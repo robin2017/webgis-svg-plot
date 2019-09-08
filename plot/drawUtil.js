@@ -28,11 +28,20 @@ function drawRect(p1, p2) {
         && p2 instanceof Array && p2.length === 2)) {
         throw new Error('请输入点数组')
     }
+
+    //计算左上角点和宽高
+    let startX = Math.min(p1[0], p2[0]);
+    let width = Math.abs(p1[0] - p2[0]);
+    let startY = Math.min(p1[1], p2[1]);
+    let height = Math.abs(p1[1] - p2[1]);
     let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    rect.setAttribute('x', p1[0]);
-    rect.setAttribute('y', p1[1]);
-    rect.setAttribute('width', (p2[0] - p1[0]) + "");
-    rect.setAttribute('height', (p2[1] - p1[1]) + "");
+    rect.setAttribute('originX', p1[0]);
+    rect.setAttribute('originY', p1[1]);
+    rect.setAttribute('x', startX + "");
+    rect.setAttribute('y', startY + "");
+
+    rect.setAttribute('width', width + "");
+    rect.setAttribute('height', height + "");
     rect.setAttribute('stroke-width', lineWidth);
     rect.setAttribute('stroke', color);
     rect.setAttribute('fill', 'none');
@@ -44,16 +53,25 @@ function modifyRect(rect, p) {
     if (!(p instanceof Array && p.length === 2)) {
         throw new Error('请输入点数组')
     }
-    let x = rect.getAttribute('x');
-    let y = rect.getAttribute('y');
 
-    rect.setAttribute('width', p[0] - x);
-    rect.setAttribute('height', p[1] - y);
+    let p1x = rect.getAttribute('originX');
+    let p1y = rect.getAttribute('originY');
+    let p2x = p[0];
+    let p2y = p[1];
+
+    //计算左上角点和宽高
+    let startX = Math.min(p1x, p2x);
+    let width = Math.abs(p1x - p2x);
+    let startY = Math.min(p1y, p2y);
+    let height = Math.abs(p1y - p2y);
+    rect.setAttribute('x', startX);
+    rect.setAttribute('y', startY);
+    rect.setAttribute('width', width);
+    rect.setAttribute('height', height);
 }
 
 
 function drawCircle(p1, p2) {
-
     if (!(p1 instanceof Array && p1.length === 2
         && p2 instanceof Array && p2.length === 2)) {
         throw new Error('请输入点数组')
@@ -138,7 +156,7 @@ function getPointEx(a, b, alpha, theta) {
     }
     let Xbb = a[0] + (1 + alpha) * (b[0] - a[0]);
     let Ybb = a[1] + (1 + alpha) * (b[1] - a[1]);
-    return rotateB(b, [Xbb,Ybb], theta)
+    return rotateB(b, [Xbb, Ybb], theta)
 }
 
 function getCfromAB(a, b, theta) {
