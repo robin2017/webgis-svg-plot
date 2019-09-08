@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>中国地图</title>
+    <meta charset="utf-8"/>
+    <script src="js/mapbox-gl.js"></script>
+    <link href="css/mapbox-gl.css" rel="stylesheet"/>
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #map {
+            height: 100%;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+<div id='map'></div>
+<script src="js/layers.js"></script>
+<script>
+    var map = new mapboxgl.Map({
+        container: 'map',
+        center: [105.7350860781, 34.3459367715],
+        zoom: 3,
+        style: {
+            "version": 8,
+            //我使用的这个版本sprite要写全路径
+            "sprite": "http://localhost:61477/sprites/sprite",
+            //字体.pbf文件获取
+            "glyphs": "../fonts/{fontstack}/{range}.pbf",
+            "sources": {
+                "china": {
+                    //矢量类型
+                    "type": "vector",
+                    //服务类型 tms，要使用wmts服务请换成wmts
+                    "scheme": "tms",
+                    "tiles": [
+                         "http://localhost:61477/maptile/{z}/{x}/{y}.pbf"
+                        //"http://localhost:8080/geoserver/gwc/service/tms/1.0.0/ROBIN%3Arobin-group@EPSG%3A900913@pbf/{z}/{x}/{y}.pbf"
+                    ]
+                }
+            },
+            "layers": globalLayers,
+            "_ssl": true
+        }
+    });
+    map.on('load', function () {
+        //to do something
+    })
+
+</script>
+</body>
+</html>
