@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="drawUtil.js"></script>
+</head>
+<body>
+<svg width="800" height="600" style="background-color: #eee" id="svg"></svg>
+<div>
+    <button onclick="setColor('black')">黑色</button>
+    <button onclick="setColor('red')">红色</button>
+    <button onclick="setColor('blue')">蓝色</button>
+</div>
+<div>
+    <button onclick="setLineWidth('1')">细</button>
+    <button onclick="setLineWidth('3')">中</button>
+    <button onclick="setLineWidth('5')">粗</button>
+</div>
+<div>
+    <button onclick="plotting('line')">线</button>
+    <button onclick="plotting('rect')">矩形</button>
+    <button onclick="plotting('circle')">圆</button>
+</div>
+<script>
+    let color = 'black', lineWidth = '1';//默认设置
+    //0:没选定类型；1：选定类型，等待点击第一个点；2：点击了一个点；3：绘制
+    let state = 0;
+    let type = null;
+    let downPoints = [];
+    let overPoints = [];
+    let drawObj = null;
+    const svg = document.querySelector('#svg');
+    const drawMap = {
+        line: drawLine,
+        rect: drawRect,
+        circle: drawCircle
+    };
+    const modifyMap = {
+        line: modifyLine,
+        rect: modifyRect,
+        circle: modifyCircle
+    }
+
+    function setColor(c) {
+        color = c;
+    }
+
+    function setLineWidth(lw) {
+        lineWidth = lw;
+    }
+
+
+    //将按下点位置放入
+    function mousedown(e) {
+        downPoints.push([e.offsetX, e.offsetY]);
+        state = 2;
+        console.log('按下一个点：', downPoints);
+        plot()
+    }
+
+    function mousemove(e) {
+        overPoints = [e.offsetX, e.offsetY];
+        plot()
+    }
+
+    function plotting(t) {
+        //双箭头特殊处理
+        if (t === 'doubleArrow') {
+            daPlot()
+        }
+        type = t;
+        state = 1;
+        svg.addEventListener('mousedown', mousedown);
+        svg.addEventListener('mousemove', mousemove);
+    }
+
+    function plot() {
+        if (state === 2) {
+            console.log('绘制第一个点：', type, drawMap[type]);
+            drawObj = drawMap[type](downPoints[0], downPoints[0]);
+            state = 3;
+        } else if (state === 3) {
+            if (downPoints.length === 2) {
+                drawObj = drawMap[type](downPoints[0], downPoints[1]);
+                console.log('绘制结束，清空状态');
+                downPoints = [];
+                svg.removeEventListener('mousedown', mousedown);
+                svg.removeEventListener('mousemove', mousemove);
+            } else if (downPoints.length === 1 && overPoints !== null) {
+                console.log('鼠标移动，一直绘制：', overPoints)
+                modifyMap[type](drawObj, overPoints)
+            }
+        }
+    }
+
+
+    /**
+     * 双箭头绘制算法
+     * */
+
+
+</script>
+</body>
+</html>
