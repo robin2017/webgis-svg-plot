@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SVG标绘</title>
+</head>
+<body>
+<header>
+    <h1>SVG标绘</h1>
+</header>
+
+<div class="body-wrapper">
+    <aside>
+        <section class="title">
+            <h2>军标列表</h2>
+        </section>
+        <section class="list">
+            <h3 class="item-title">点军标</h3>
+            <ul class="item-ul">
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/point/fly.svg" class="icon-content" alt="飞机">
+                        <div>飞机</div>
+                    </div>
+                </li>
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/point/people.svg" class="icon-content" alt="飞机">
+                        <div>人员</div>
+                    </div>
+                </li>
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/point/ship.svg" class="icon-content" alt="飞机">
+                        <div>船只</div>
+                    </div>
+                </li>
+            </ul>
+
+            <h3 class="item-title">线面军标</h3>
+            <ul class="item-ul">
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/xm/line.svg" class="icon-content" alt="飞机">
+                        <div>线段</div>
+                    </div>
+                </li>
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/xm/circle.svg" class="icon-content" alt="飞机">
+                        <div>圆</div>
+                    </div>
+                </li>
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/xm/rect.svg" class="icon-content" alt="飞机">
+                        <div>矩形</div>
+                    </div>
+                </li>
+            </ul>
+        </section>
+    </aside>
+    <main>
+        <svg id="plotBoard">
+            <use xlink:href="#point_fly" x="20" y="145"/>
+        </svg>
+    </main>
+</div>
+<div id="svg-lib" style="height:0;"></div>
+<script src="svgUtils.js"></script>
+<script>
+    console.log('完成svg-lib加载');
+    loadSvg('#svg-lib', './icon/point/point-lib.svg')
+</script>
+<script>
+    let plotTargetPath = null;
+    const plotBoard = document.querySelector('#plotBoard');
+     function init(){
+
+     }
+    init()
+    document.querySelector('.body-wrapper>aside').addEventListener('click', function (evt) {
+        if (evt.target.nodeName === 'IMG') {
+            let src = evt.target.getAttribute('src')
+            let path = src.substring(5, src.length - 4);
+            console.log('点击了：', path);
+            plotTargetPath = path;
+            if(path.startsWith("point")){
+                plotPoint()
+            }
+        }
+    });
+    
+    function plotPoint() {
+        const newUse = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        newUse.setAttributeNS('http://www.w3.org/1999/xlink', 'href', "#point_fly");
+        newUse.setAttribute("x", "25");
+        newUse.setAttribute("y", "145");
+        plotBoard.appendChild(newUse);
+    }
+</script>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        height: 100%;
+    }
+
+    header {
+        height: 100px;
+        display: flex;
+        align-items: center;
+        margin-left: 30px;
+    }
+
+    .body-wrapper {
+        display: flex;
+        height: calc(100% - 140px);
+        margin: 20px;
+    }
+
+    .body-wrapper > aside {
+        width: 400px;
+        background-color: #ede;
+        border-radius: 10px;
+    }
+
+    .body-wrapper > aside .title {
+        border-bottom: 2px solid lightcoral;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        padding-left: 20px;
+    }
+
+    .body-wrapper > aside .list .item-title {
+        margin: 10px;
+    }
+
+    .body-wrapper > aside .list .item-ul {
+        margin-left: 10px;
+    }
+
+    .body-wrapper > aside .list .icon-unit {
+        display: inline-block;
+
+    }
+
+    .body-wrapper > aside .list .icon-unit img {
+
+        cursor: pointer;
+    }
+
+    .body-wrapper > aside .list .icon-unit div {
+        display: flex;
+        justify-content: center;
+    }
+
+    .body-wrapper > aside .list ul li {
+        display: inline;
+        list-style-type: none;
+    }
+
+    .body-wrapper > aside .list .icon-content {
+        height: 60px;
+        border: 1px solid black;
+        border-radius: 4px;
+    }
+
+    .body-wrapper > main {
+        margin-left: 20px;
+        flex: 1;
+        background-color: lightgray;
+        border-radius: 10px;
+    }
+</style>
+</body>
+
+</html>

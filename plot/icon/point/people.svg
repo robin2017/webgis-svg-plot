@@ -1,0 +1,7 @@
+<svg version="1.1" id="bug" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve">
+    <circle cx="32" cy="20" r="10" fill="none" stroke="black" stroke-width="2"></circle>
+    <line x1="32" y1="30" x2="10" y2="50" stroke="black" stroke-width="2"></line>
+    <line x1="32" y1="30" x2="54" y2="50" stroke="black" stroke-width="2"></line>
+    <line x1="32" y1="40" x2="32" y2="60" stroke="black" stroke-width="2"></line>
+</svg>

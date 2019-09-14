@@ -23,6 +23,8 @@
     <button onclick="plotting('circle')">圆</button>
 </div>
 <script>
+
+
     let color = 'black', lineWidth = '1';//默认设置
     //0:没选定类型；1：选定类型，等待点击第一个点；2：点击了一个点；3：绘制
     let state = 0;
@@ -31,6 +33,12 @@
     let overPoints = [];
     let drawObj = null;
     const svg = document.querySelector('#svg');
+    svg.addEventListener('click', function (e) {
+        handleClick(e);
+    });
+    svg.addEventListener('mousemove', function (e) {
+        handleMousemove(e);
+    })
     const drawMap = {
         line: drawLine,
         rect: drawRect,
@@ -40,7 +48,7 @@
         line: modifyLine,
         rect: modifyRect,
         circle: modifyCircle
-    }
+    };
 
     function setColor(c) {
         color = c;
@@ -77,9 +85,13 @@
 
     function plot() {
         if (state === 2) {
-            console.log('绘制第一个点：', type, drawMap[type]);
-            drawObj = drawMap[type](downPoints[0], downPoints[0]);
-            state = 3;
+            if (downPoints.length === 1) {
+                console.log('绘制第一个点：', type, drawMap[type]);
+                drawObj = drawMap[type](downPoints[0], downPoints[0]);
+                state = 3;
+            }else{
+
+            }
         } else if (state === 3) {
             if (downPoints.length === 2) {
                 drawObj = drawMap[type](downPoints[0], downPoints[1]);
@@ -93,6 +105,52 @@
             }
         }
     }
+
+    function handleClick(e) {
+        console.log(e.target);
+        if (!e.target) return;
+        if (e.target.nodeName === 'line') {
+            console.log('选中一个线');
+            clickLine(e.target)
+        }
+        //选中空白区域
+        if (e.target.nodeName === 'svg') {
+            console.log('准备清空====');
+            for (let i = svg.childNodes.length - 1; i >= 0; i--) {
+                let node = svg.childNodes[i];
+                //1、所有元素去掉标记
+                node.setAttribute('hasClick', false);
+                if (node.getAttribute('isControl') === "true") {
+                    //2、删掉所有控制点
+                    svg.removeChild(node)
+                }
+            }
+        }
+    }
+
+    function handleMousemove(e) {
+        if (e.target.nodeName !== 'svg') {
+            svg.style = "cursor:pointer"
+        } else {
+            svg.style = "cursor:default"
+        }
+    }
+
+
+    function clickLine(node) {
+        //1、标记被选中了
+        node.setAttribute('hasClick', true);
+        //2、显示两个端点
+        let x1 = node.getAttribute('x1');
+        let y1 = node.getAttribute('y1');
+        let x2 = node.getAttribute('x2');
+        let y2 = node.getAttribute('y2');
+
+        drawControl(x1, y1);
+        drawControl(x2, y2);
+        console.log("线被点击了：", x1, x2, y1, y2)
+    }
+
 </script>
 </body>
 </html>

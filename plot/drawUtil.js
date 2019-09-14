@@ -12,6 +12,7 @@ function drawLine(p1, p2) {
     line.setAttribute('stroke-width', lineWidth);
     line.setAttribute('stroke', color);
     svg.appendChild(line);
+    console.log('=======绘制一条线=======：',p1,p2);
     return line;
 }
 
@@ -70,6 +71,18 @@ function modifyRect(rect, p) {
     rect.setAttribute('height', height);
 }
 
+//画控制点
+function drawControl(cx,cy,r=6,stroke='black',stroke_width='2') {
+    let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('isControl',true);
+    circle.setAttribute('cx', cx);
+    circle.setAttribute('cy', cy);
+    circle.setAttribute('r', r + "");
+    circle.setAttribute('stroke-width', stroke_width);
+    circle.setAttribute('stroke', stroke);
+    circle.setAttribute('fill', 'lightblue');
+    svg.appendChild(circle);
+}
 
 function drawCircle(p1, p2) {
     if (!(p1 instanceof Array && p1.length === 2
