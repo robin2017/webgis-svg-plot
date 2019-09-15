@@ -3,23 +3,25 @@
      xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
-        <g id="point_fly" isEdit="false" class="edit-active" stroke="black" fill="blue" >
+        <!--样式只能为edit-active/edit-inactive-->
+        <g id="point_fly"  class="edit-inactive" stroke="black">
             <line x1="10" y1="10" x2="54" y2="30" stroke="black" stroke-width="2"></line>
             <line x1="10" y1="30" x2="54" y2="10" stroke="black" stroke-width="2"></line>
             <line x1="32" y1="20" x2="32" y2="40" stroke="black" stroke-width="2"></line>
             <polygon points="32,40 16,56 48,56" fill="none" stroke-width="2"></polygon>
-            <g id="fly-control" class="control-group" style="display:none">
-                <circle cx="0" cy="0" r="3" stroke-width="1"></circle>
-                <circle cx="32" cy="0" r="3" stroke-width="1"></circle>
-                <circle cx="64" cy="0" r="3" stroke-width="1"></circle>
-                <circle cx="64" cy="32" r="3" stroke-width="1"></circle>
-                <circle cx="64" cy="64" r="3" stroke-width="1"></circle>
-                <circle cx="32" cy="64" r="3" stroke-width="1"></circle>
-                <circle cx="0" cy="64" r="3" stroke-width="1"></circle>
-                <circle cx="0" cy="32" r="3" stroke-width="1"></circle>
+            <!--样式只能为control-group-->
+            <g id="fly-control" class="control-group" stroke-width="1" fill="blue">
+                <circle cx="0" cy="0" r="3" class="control-item-4"></circle>
+                <circle cx="32" cy="0" r="3" class="control-item-2"></circle>
+                <circle cx="64" cy="0" r="3" class="control-item-3"></circle>
+                <circle cx="64" cy="32" r="3" class="control-item-1"></circle>
+                <circle cx="64" cy="64" r="3" class="control-item-4"></circle>
+                <circle cx="32" cy="64" r="3" class="control-item-2"></circle>
+                <circle cx="0" cy="64" r="3" class="control-item-3"></circle>
+                <circle cx="0" cy="32" r="3" class="control-item-1"></circle>
             </g>
         </g>
-        <g id="point/fly" isEdit="false" stroke="black" fill="blue" >
+        <g id="point/fly" isEdit="false" stroke="black" fill="blue">
             <line x1="10" y1="10" x2="54" y2="30" stroke="black" stroke-width="2"></line>
             <line x1="10" y1="30" x2="54" y2="10" stroke="black" stroke-width="2"></line>
             <line x1="32" y1="20" x2="32" y2="40" stroke="black" stroke-width="2"></line>
@@ -36,7 +38,7 @@
             </g>
         </g>
 
-        <g id="point/people" isEdit="false" stroke="black" fill="blue" >
+        <g id="point/people" isEdit="false" stroke="black" fill="blue">
             <circle cx="32" cy="20" r="10" fill="none" stroke="black" stroke-width="2"></circle>
             <line x1="32" y1="30" x2="10" y2="50" stroke-width="2"></line>
             <line x1="32" y1="30" x2="54" y2="50" stroke-width="2"></line>
@@ -53,21 +55,21 @@
             </g>
         </g>
 
-        <g id="point/ship" isEdit="false" stroke="black" fill="blue" >
+        <g id="point/ship" isEdit="false" stroke="black" fill="blue">
             <path d="M 25 16 A 16, 16 0 1 ,0 25 ,48"
                   fill="none" stroke="black" stroke-width="2"></path>
             <line x1="25" y1="16" x2="56" y2="16" stroke-width="2"></line>
             <line x1="25" y1="48" x2="56" y2="48" stroke-width="2"></line>
             <line x1="56" y1="16" x2="56" y2="48" stroke-width="2"></line>
             <g class="control-group" id="ship-control" style="display:none">
-                <circle cx="0" cy="0" r="3" stroke-width="1"></circle>
-                <circle cx="32" cy="0" r="3" stroke-width="1"></circle>
-                <circle cx="64" cy="0" r="3" stroke-width="1"></circle>
-                <circle cx="64" cy="32" r="3" stroke-width="1"></circle>
-                <circle cx="64" cy="64" r="3" stroke-width="1"></circle>
-                <circle cx="32" cy="64" r="3" stroke-width="1"></circle>
-                <circle cx="0" cy="64" r="3" stroke-width="1"></circle>
-                <circle cx="0" cy="32" r="3" stroke-width="1"></circle>
+                <circle cx="0" cy="0" r="3" stroke-width="1" class="control-item-4"></circle>
+                <circle cx="32" cy="0" r="3" stroke-width="1" class="control-item-2"></circle>
+                <circle cx="64" cy="0" r="3" stroke-width="1" class="control-item-3"></circle>
+                <circle cx="64" cy="32" r="3" stroke-width="1" class="control-item-1"></circle>
+                <circle cx="64" cy="64" r="3" stroke-width="1" class="control-item-4"></circle>
+                <circle cx="32" cy="64" r="3" stroke-width="1" class="control-item-2"></circle>
+                <circle cx="0" cy="64" r="3" stroke-width="1" class="control-item-3"></circle>
+                <circle cx="0" cy="32" r="3" stroke-width="1" class="control-item-1"></circle>
             </g>
 
         </g>

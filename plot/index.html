@@ -85,30 +85,47 @@
             let y = evt.clientY - evt.target.getBoundingClientRect().top;
             // plotPointUse(x, y)
             plotPointClone(x, y)
+        }else if(evt.target.nodeName !== "svg" && plotTargetPath===null){//选中目标
+            console.log('选中目标')
+            let target = evt.target;
+            if(getEleState(target)==='edit-inactive'){
+               let node =  getEleNode(target);
+               node.setAttribute('class','edit-active')
+            }
+        } else if(plotTargetPath === null && evt.target.nodeName === "svg"){//全部不可编辑
+            plotBoard.childNodes.forEach(node=>{
+                node.setAttribute&&node.setAttribute('class',"edit-inactive") ;
+            })
         }
     });
 
     plotBoard.addEventListener('mousemove', function (evt) {
-        let target = evt.target;
-        if (target.nodeName !== 'svg') {//选中了元素
-            console.log('getEdit:', getEleEdit(target))
-            if (!getEleEdit(target)) {//不可编辑
-                target.style="cursor:pointer"
-            }
-        }
+
     });
 
-    function getEleEdit(ele) {//得到元素的编辑状态
+    function getEleState(ele) {//得到元素的编辑状态
         console.log(ele.nodeName)
-        let isEdit = ele.getAttribute('isedit');
-        if (isEdit !== null) {
-            return isEdit
+        let isActive = ele.getAttribute('class');
+        if (isActive !== null && isActive.startsWith("edit")) {
+            return isActive
         }
         if (ele.nodeName === 'svg') {
             console.error('该元素没有isEdit属性');
             return 'false'
         }
-        return getEleEdit(ele.parentNode)
+        return getEleState(ele.parentNode)
+    }
+
+    function getEleNode(ele){
+        let isActive = ele.getAttribute('class');
+        if (isActive !== null && isActive.startsWith("edit")) {
+            return ele
+        }
+        if (ele.nodeName === 'svg') {
+            console.error('该元素没有isEdit属性');
+            return 'false'
+        }
+        return getEleNode(ele.parentNode)
     }
 
     document.querySelector('.body-wrapper > aside .title .cancel')
@@ -225,8 +242,39 @@
         border-radius: 10px;
     }
 
+    /*操作规范，参见：chap7、svg元素拖动*/
+
+    /*不可编辑状态*/
+    #plotBoard .edit-inactive{
+        cursor:pointer;
+    }
+
+    #plotBoard .edit-inactive .control-group  {
+        display:none;
+    }
+
+    /*可编辑状态*/
     #plotBoard .edit-active {
-        cursor:move
+        cursor: move;
+    }
+
+
+
+    #plotBoard .edit-active .control-group .control-item-1 {
+        cursor: w-resize;
+        /*cursor:url("http://ued.taobao.com/blog/wp-content/themes/taobaoued/images/cursor.ico") ,auto;*/
+    }
+
+    #plotBoard .edit-active .control-group .control-item-2 {
+        cursor:s-resize;
+    }
+
+    #plotBoard .edit-active .control-group .control-item-3 {
+        cursor: ne-resize;
+    }
+
+    #plotBoard .edit-active .control-group .control-item-4 {
+        cursor: se-resize;
     }
 </style>
 </body>
