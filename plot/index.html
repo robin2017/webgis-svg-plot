@@ -79,19 +79,20 @@
     const plotBoard = document.querySelector('#plotBoard');
     const plotLib = document.querySelector('#svg-lib');
     const translateRegEx = /translate\((.*?),(.*?)\)/;
+    const scaleRegEx = /scale\((.*?),(.*?)\)/;
 
     //拖拽相关变量
     let dragTarget = null, dragTargetX = null, dragTargetY = null,
         dragTargetClientX = null, dragTargetClientY = null;
 
     function dragStart(evt) {
-        console.log('dragStart')
+        console.log('dragStart');
         dragTarget = getEleNode(evt.target);
         dragTargetClientX = evt.clientX;
         dragTargetClientY = evt.clientY;
         let transform = dragTarget.getAttribute("transform");
         let ret = translateRegEx.exec(transform);
-        if (ret !== null) {
+        if (ret !== null) {//肯定有
             dragTargetX = parseFloat(ret[1]);
             dragTargetY = parseFloat(ret[2]);
             console.log('dragStart:', dragTarget, dragTargetX, dragTargetY, dragTargetClientX, dragTargetClientY)
@@ -109,9 +110,37 @@
     }
 
     function dragEnd(evt) {
-        console.log('dragEnd')
+        console.log('dragEnd');
         dragTarget = null;
     }
+
+    //缩放相关变量
+    let scaleTarget = null, scaleTargetX = null, scaleTargetY = null,
+        scaleValueX = null, scaleValueY = null,
+        scaleTargetClientX = null, scaleTargetClientY = null;
+
+    function scaleStart(evt) {
+        console.log('scaleStart');
+        scaleTarget = getEleNode(evt.target);
+        scaleTargetClientX = evt.clientX;
+        scaleTargetClientY = evt.clientY;
+        let transform = dragTarget.getAttribute("transform");
+        let ret = scaleRegEx.exec(transform);
+        if (ret !== null) {
+            scaleValueX = parseFloat(ret[1]);
+            scaleValueY = parseFloat(ret[2]);
+        } else {
+            scaleValueX = scaleValueY = 1;
+        }
+    }
+
+    function scaleMove(evt) {
+        if (scaleTarget) {
+            console.log('scaleMove');
+            let dx =
+        }
+    }
+
 
     plotBoard.addEventListener('click', function (evt) {
         if (plotTargetPath !== null && evt.target.nodeName === "svg") {
@@ -141,7 +170,13 @@
             && getEleState(evt.target) === 'edit-active') {
             dragStart(evt)
         }
-    })
+    });
+    // plotBoard.querySelectorAll('.control-group').forEach(element=>{
+    //
+    //     element.addEventListener('mousedown',function (evt) {
+    //         console.log('控制点按下：',evt.target)
+    //     })
+    // })
 
     plotBoard.addEventListener('mousemove', function (evt) {
         dragMove(evt);
@@ -201,6 +236,11 @@
         let clone = target.cloneNode(true);
         clone.setAttribute('transform', `translate(${x},${y})`);
         plotBoard.appendChild(clone)
+        clone.querySelector('.control-group').addEventListener('mousedown', function (evt) {
+            console.log('控制点被按下：', evt.target);
+            scaleStart(evt);
+            evt.stopPropagation();//停止传播
+        })
     }
 </script>
 <style>
