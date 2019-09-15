@@ -78,6 +78,40 @@
     let plotTargetPath = null;
     const plotBoard = document.querySelector('#plotBoard');
     const plotLib = document.querySelector('#svg-lib');
+    const translateRegEx = /translate\((.*?),(.*?)\)/;
+
+    //拖拽相关变量
+    let dragTarget = null, dragTargetX = null, dragTargetY = null,
+        dragTargetClientX = null, dragTargetClientY = null;
+
+    function dragStart(evt) {
+        console.log('dragStart')
+        dragTarget = getEleNode(evt.target);
+        dragTargetClientX = evt.clientX;
+        dragTargetClientY = evt.clientY;
+        let transform = dragTarget.getAttribute("transform");
+        let ret = translateRegEx.exec(transform);
+        if (ret !== null) {
+            dragTargetX = parseFloat(ret[1]);
+            dragTargetY = parseFloat(ret[2]);
+            console.log('dragStart:', dragTarget, dragTargetX, dragTargetY, dragTargetClientX, dragTargetClientY)
+        }
+    }
+
+    function dragMove(evt) {
+        if (dragTarget) {
+            console.log('dragMove')
+            let dx = evt.clientX - dragTargetClientX;
+            let dy = evt.clientY - dragTargetClientY;
+            let translate = `translate(${dx + dragTargetX},${dy + dragTargetY})`
+            dragTarget.setAttribute('transform', translate)
+        }
+    }
+
+    function dragEnd(evt) {
+        console.log('dragEnd')
+        dragTarget = null;
+    }
 
     plotBoard.addEventListener('click', function (evt) {
         if (plotTargetPath !== null && evt.target.nodeName === "svg") {
@@ -85,22 +119,35 @@
             let y = evt.clientY - evt.target.getBoundingClientRect().top;
             // plotPointUse(x, y)
             plotPointClone(x, y)
-        }else if(evt.target.nodeName !== "svg" && plotTargetPath===null){//选中目标
+        } else if (evt.target.nodeName !== "svg" && plotTargetPath === null) {//选中目标，
             console.log('选中目标')
             let target = evt.target;
-            if(getEleState(target)==='edit-inactive'){
-               let node =  getEleNode(target);
-               node.setAttribute('class','edit-active')
+            if (getEleState(target) === 'edit-inactive') {//状态不可编辑
+                let node = getEleNode(target);
+                node.setAttribute('class', 'edit-active')
+            } else if (getEleState(target) === 'edit-active') {//状态可编辑
+                //dragStart(evt)
             }
-        } else if(plotTargetPath === null && evt.target.nodeName === "svg"){//全部不可编辑
-            plotBoard.childNodes.forEach(node=>{
-                node.setAttribute&&node.setAttribute('class',"edit-inactive") ;
+        } else if (plotTargetPath === null && evt.target.nodeName === "svg") {//全部状态不可编辑
+            plotBoard.childNodes.forEach(node => {
+                node.setAttribute && node.setAttribute('class', "edit-inactive");
             })
         }
     });
 
-    plotBoard.addEventListener('mousemove', function (evt) {
+    plotBoard.addEventListener('mousedown', function (evt) {
+        if (evt.target.nodeName !== "svg"
+            && plotTargetPath === null
+            && getEleState(evt.target) === 'edit-active') {
+            dragStart(evt)
+        }
+    })
 
+    plotBoard.addEventListener('mousemove', function (evt) {
+        dragMove(evt);
+    });
+    plotBoard.addEventListener('mouseup', function (evt) {
+        dragEnd(evt);
     });
 
     function getEleState(ele) {//得到元素的编辑状态
@@ -116,7 +163,7 @@
         return getEleState(ele.parentNode)
     }
 
-    function getEleNode(ele){
+    function getEleNode(ele) {
         let isActive = ele.getAttribute('class');
         if (isActive !== null && isActive.startsWith("edit")) {
             return ele
@@ -245,12 +292,12 @@
     /*操作规范，参见：chap7、svg元素拖动*/
 
     /*不可编辑状态*/
-    #plotBoard .edit-inactive{
-        cursor:pointer;
+    #plotBoard .edit-inactive {
+        cursor: pointer;
     }
 
-    #plotBoard .edit-inactive .control-group  {
-        display:none;
+    #plotBoard .edit-inactive .control-group {
+        display: none;
     }
 
     /*可编辑状态*/
@@ -258,15 +305,13 @@
         cursor: move;
     }
 
-
-
     #plotBoard .edit-active .control-group .control-item-1 {
         cursor: w-resize;
         /*cursor:url("http://ued.taobao.com/blog/wp-content/themes/taobaoued/images/cursor.ico") ,auto;*/
     }
 
     #plotBoard .edit-active .control-group .control-item-2 {
-        cursor:s-resize;
+        cursor: s-resize;
     }
 
     #plotBoard .edit-active .control-group .control-item-3 {

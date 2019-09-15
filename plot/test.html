@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+test
+<script>
+    let str = 'translate(158,178.34)';
+    let regEx = /translate\((.*?),(.*?)\)/
+   let ret = regEx.exec(str);
+    if(ret !==null){
+        console.log(parseFloat(ret[1]),ret[2])
+    }
+
+</script>
+
+</body>
+</html>
