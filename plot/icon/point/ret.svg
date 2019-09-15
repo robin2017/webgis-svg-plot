@@ -1,0 +1,62 @@
+<svg width="400" height="250" viewBox="0 0 400 250" onload="init(evt)" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>         <!--样式只能为edit-active/edit-inactive-->
+        <g id="point_fly" class="edit-inactive" stroke="black" stroke-width="2">
+            <line x1="-46" y1="-22" x2="-2" y2="-2"></line>
+            <line x1="-46" y1="-2" x2="-2" y2="-22"></line>
+            <line x1="-24" y1="-12" x2="-24" y2="8"></line>
+            <polygon points="32,40 16,56 48,56" fill="none"></polygon>             <!--样式只能为control-group-->
+            <g id="fly-control" class="control-group" stroke-width="1" fill="blue">
+                <circle cx="-56" cy="-32" r="3" class="control-item-4"></circle>
+                <circle cx="-24" cy="-32" r="3" class="control-item-2"></circle>
+                <circle cx="8" cy="-32" r="3" class="control-item-3"></circle>
+                <circle cx="8" cy="0" r="3" class="control-item-1"></circle>
+                <circle cx="8" cy="32" r="3" class="control-item-4"></circle>
+                <circle cx="-24" cy="32" r="3" class="control-item-2"></circle>
+                <circle cx="-56" cy="32" r="3" class="control-item-3"></circle>
+                <circle cx="-56" cy="0" r="3" class="control-item-1"></circle>
+            </g>
+            <g class="center-point" fill="red">
+                <circle cx="-24" cy="8" r="2"></circle>
+            </g>
+        </g>
+        <g id="point_people" class="edit-inactive" stroke="black" stroke-width="2">
+            <circle cx="-24" cy="-12" r="10" fill="none"></circle>
+            <line x1="-24" y1="-2" x2="-46" y2="18"></line>
+            <line x1="-24" y1="-2" x2="-2" y2="18"></line>
+            <line x1="-24" y1="8" x2="-24" y2="28"></line>
+            <g id="people-control" class="control-group" stroke-width="1" fill="blue">
+                <circle cx="-56" cy="-32" r="3" class="control-item-4"></circle>
+                <circle cx="-24" cy="-32" r="3" class="control-item-2"></circle>
+                <circle cx="8" cy="-32" r="3" class="control-item-3"></circle>
+                <circle cx="8" cy="0" r="3" class="control-item-1"></circle>
+                <circle cx="8" cy="32" r="3" class="control-item-4"></circle>
+                <circle cx="-24" cy="32" r="3" class="control-item-2"></circle>
+                <circle cx="-56" cy="32" r="3" class="control-item-3"></circle>
+                <circle cx="-56" cy="0" r="3" class="control-item-1"></circle>
+            </g>
+            <g class="center-point" fill="red">
+                <circle cx="-24" cy="8" r="2"></circle>
+            </g>
+        </g>
+        <g id="point_ship" class="edit-inactive" stroke="black" stroke-width="2">
+            <path d="M 25 16 A 16, 16 0 1 ,0 25 ,48" fill="none"></path>
+            <line x1="-31" y1="-16" x2="0" y2="-16"></line>
+            <line x1="-31" y1="16" x2="0" y2="16"></line>
+            <line x1="0" y1="-16" x2="0" y2="16"></line>
+            <g id="ship-control" class="control-group" stroke-width="1" fill="blue">
+                <circle cx="-56" cy="-32" r="3" class="control-item-4"></circle>
+                <circle cx="-24" cy="-32" r="3" class="control-item-2"></circle>
+                <circle cx="8" cy="-32" r="3" class="control-item-3"></circle>
+                <circle cx="8" cy="0" r="3" class="control-item-1"></circle>
+                <circle cx="8" cy="32" r="3" class="control-item-4"></circle>
+                <circle cx="-24" cy="32" r="3" class="control-item-2"></circle>
+                <circle cx="-56" cy="32" r="3" class="control-item-3"></circle>
+                <circle cx="-56" cy="0" r="3" class="control-item-1"></circle>
+            </g>
+            <g class="center-point" fill="red">
+                <circle cx="0" cy="0" r="2"></circle>
+            </g>
+        </g>
+    </defs>
+</svg>

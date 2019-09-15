@@ -92,6 +92,7 @@
         dragTargetClientY = evt.clientY;
         let transform = dragTarget.getAttribute("transform");
         let ret = translateRegEx.exec(transform);
+        console.log(ret[0])
         if (ret !== null) {//肯定有
             dragTargetX = parseFloat(ret[1]);
             dragTargetY = parseFloat(ret[2]);
@@ -101,11 +102,16 @@
 
     function dragMove(evt) {
         if (dragTarget) {
-            console.log('dragMove')
+            console.log('dragMove');
             let dx = evt.clientX - dragTargetClientX;
             let dy = evt.clientY - dragTargetClientY;
-            let translate = `translate(${dx + dragTargetX},${dy + dragTargetY})`
-            dragTarget.setAttribute('transform', translate)
+            let transform = dragTarget.getAttribute("transform");
+            let ret = translateRegEx.exec(transform);
+            let translateBefore = ret[0];
+            let translateAfter = `translate(${dx + dragTargetX},${dy + dragTargetY})`;
+            transform = transform.replace(translateBefore, translateAfter);
+            console.log('dragMove value:', transform, '/', translateBefore, '/', translateAfter)
+            dragTarget.setAttribute('transform', transform)
         }
     }
 
@@ -124,7 +130,7 @@
         scaleTarget = getEleNode(evt.target);
         scaleTargetClientX = evt.clientX;
         scaleTargetClientY = evt.clientY;
-        let transform = dragTarget.getAttribute("transform");
+        let transform = scaleTarget.getAttribute("transform");
         let ret = scaleRegEx.exec(transform);
         if (ret !== null) {
             scaleValueX = parseFloat(ret[1]);
@@ -137,7 +143,7 @@
     function scaleMove(evt) {
         if (scaleTarget) {
             console.log('scaleMove');
-            let dx =
+
         }
     }
 
@@ -171,12 +177,7 @@
             dragStart(evt)
         }
     });
-    // plotBoard.querySelectorAll('.control-group').forEach(element=>{
-    //
-    //     element.addEventListener('mousedown',function (evt) {
-    //         console.log('控制点按下：',evt.target)
-    //     })
-    // })
+
 
     plotBoard.addEventListener('mousemove', function (evt) {
         dragMove(evt);
@@ -234,7 +235,7 @@
     function plotPointClone(x, y) {
         let target = plotLib.querySelector('#' + plotTargetPath.replace('/', '_'));
         let clone = target.cloneNode(true);
-        clone.setAttribute('transform', `translate(${x},${y})`);
+        clone.setAttribute('transform', `translate(${x},${y}) scale(1,1)`);
         plotBoard.appendChild(clone)
         clone.querySelector('.control-group').addEventListener('mousedown', function (evt) {
             console.log('控制点被按下：', evt.target);
