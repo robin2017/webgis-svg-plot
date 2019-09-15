@@ -122,12 +122,14 @@
 
     //缩放相关变量
     let scaleTarget = null, scaleTargetX = null, scaleTargetY = null,
-        scaleValueX = null, scaleValueY = null,
+        scaleValueX = null, scaleValueY = null, cx = null, cy = null,
         scaleTargetClientX = null, scaleTargetClientY = null;
 
     function scaleStart(evt) {
         console.log('scaleStart');
         scaleTarget = getEleNode(evt.target);
+        cx = parseFloat(evt.target.getAttribute('cx'));
+        cy = parseFloat(evt.target.getAttribute('cy'));
         scaleTargetClientX = evt.clientX;
         scaleTargetClientY = evt.clientY;
         let transform = scaleTarget.getAttribute("transform");
@@ -138,15 +140,58 @@
         } else {
             scaleValueX = scaleValueY = 1;
         }
+        console.log('scaleStart value:', cx, cy, scaleTarget, scaleValueX, scaleValueY)
     }
 
     function scaleMove(evt) {
         if (scaleTarget) {
-            console.log('scaleMove');
+            console.log('scaleMove:', scaleValueX, scaleValueY,
+                scaleTargetClientX, scaleTargetClientY);
+            let dx = evt.clientX - scaleTargetClientX;
+            let scaleX = dx / cx + 1;
+            console.log(dx, cx, scaleX);
 
+            let transform = scaleTarget.getAttribute("transform");
+            let ret = scaleRegEx.exec(transform);
+            let scaleBefore = ret[0];
+            let scaleAfter = `scale(${scaleX},1)`;
+            transform = transform.replace(scaleBefore, scaleAfter);
+            console.log('scaleMove value:', transform, '/', scaleBefore, '/', scaleAfter)
+            scaleTarget.setAttribute('transform', transform)
         }
     }
 
+    function scaleEnd() {
+        scaleTarget = null;
+
+    }
+
+    //旋转相关变量
+    let rotateTarget = null, rotateCx = null, rotateCy = null,initAngle=null,
+        rotateClientX, rotateClientY;
+
+    function rotateStart(evt) {
+        console.log('rotateStart');
+        rotateTarget = getEleNode(evt.target);
+        let cx = parseFloat(evt.target.getAttribute('cx'));
+        let cy = parseFloat(evt.target.getAttribute('cy'));
+        rotateClientX = evt.clientX;
+        rotateClientY = evt.clientY;
+        rotateCx = rotateClientX - cx;
+        rotateCy = rotateClientY - cy;
+        console.log(rotateTarget, rotateCx, rotateCy, rotateClientX, rotateClientY)
+    }
+
+    function rotateMove(evt){
+        let x = evt.clientX;
+        let y = evt.clientY;
+
+    }
+
+    //三点坐标求夹角
+    function getAngle(center,first,second){
+
+    }
 
     plotBoard.addEventListener('click', function (evt) {
         if (plotTargetPath !== null && evt.target.nodeName === "svg") {
@@ -224,24 +269,34 @@
         }
     });
 
-    function plotPointUse(x, y) {
-        const newUse = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-        newUse.setAttributeNS('http://www.w3.org/1999/xlink', 'href', "#" + plotTargetPath);
-        newUse.setAttribute("x", x);
-        newUse.setAttribute("y", y);
-        plotBoard.appendChild(newUse);
-    }
 
     function plotPointClone(x, y) {
         let target = plotLib.querySelector('#' + plotTargetPath.replace('/', '_'));
         let clone = target.cloneNode(true);
-        clone.setAttribute('transform', `translate(${x},${y}) scale(1,1)`);
-        plotBoard.appendChild(clone)
-        clone.querySelector('.control-group').addEventListener('mousedown', function (evt) {
+        clone.setAttribute('transform', `translate(${x},${y}) scale(1,1) rotate(0)`);
+        plotBoard.appendChild(clone);
+        let controlGroup = clone.querySelector('.control-group');
+        controlGroup.addEventListener('mousedown', function (evt) {
             console.log('控制点被按下：', evt.target);
             scaleStart(evt);
             evt.stopPropagation();//停止传播
+        });
+        controlGroup.addEventListener('mousemove', function (evt) {
+            scaleMove(evt);
+            evt.stopPropagation();
+        });
+        controlGroup.addEventListener('mouseup', function (evt) {
+            scaleEnd();
+            evt.stopPropagation();
         })
+
+        let rotateItem = clone.querySelector('.control-group .control-item-rotate')
+        if (rotateItem) {
+            rotateItem.addEventListener('mousedown', function (evt) {
+                rotateStart(evt);
+                evt.stopPropagation();//停止传播
+            })
+        }
     }
 </script>
 <style>
@@ -361,6 +416,12 @@
 
     #plotBoard .edit-active .control-group .control-item-4 {
         cursor: se-resize;
+    }
+
+    #plotBoard .edit-active .control-group .control-item-rotate {
+        fill: yellow;
+        cursor: url("rotate.ico"), auto;
+
     }
 </style>
 </body>
