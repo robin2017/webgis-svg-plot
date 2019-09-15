@@ -13,6 +13,7 @@
     <aside>
         <section class="title">
             <h2>军标列表</h2>
+            <button class="cancel">取消标绘</button>
         </section>
         <section class="list">
             <h3 class="item-title">点军标</h3>
@@ -61,12 +62,13 @@
         </section>
     </aside>
     <main>
-        <svg id="plotBoard">
-            <use xlink:href="#point_fly" x="20" y="145"/>
+        <svg id="plotBoard" width="100%" height="100%">
+
         </svg>
     </main>
 </div>
 <div id="svg-lib" style="height:0;"></div>
+
 <script src="svgUtils.js"></script>
 <script>
     console.log('完成svg-lib加载');
@@ -75,28 +77,66 @@
 <script>
     let plotTargetPath = null;
     const plotBoard = document.querySelector('#plotBoard');
-     function init(){
+    const plotLib = document.querySelector('#svg-lib');
 
-     }
-    init()
-    document.querySelector('.body-wrapper>aside').addEventListener('click', function (evt) {
-        if (evt.target.nodeName === 'IMG') {
-            let src = evt.target.getAttribute('src')
-            let path = src.substring(5, src.length - 4);
-            console.log('点击了：', path);
-            plotTargetPath = path;
-            if(path.startsWith("point")){
-                plotPoint()
+    plotBoard.addEventListener('click', function (evt) {
+        if (plotTargetPath !== null && evt.target.nodeName === "svg") {
+            let x = evt.clientX - evt.target.getBoundingClientRect().left;
+            let y = evt.clientY - evt.target.getBoundingClientRect().top;
+            // plotPointUse(x, y)
+            plotPointClone(x, y)
+        }
+    });
+
+    plotBoard.addEventListener('mousemove', function (evt) {
+        let target = evt.target;
+        if (target.nodeName !== 'svg') {//选中了元素
+            console.log('getEdit:', getEleEdit(target))
+            if (!getEleEdit(target)) {//不可编辑
+                target.style="cursor:pointer"
             }
         }
     });
-    
-    function plotPoint() {
+
+    function getEleEdit(ele) {//得到元素的编辑状态
+        console.log(ele.nodeName)
+        let isEdit = ele.getAttribute('isedit');
+        if (isEdit !== null) {
+            return isEdit
+        }
+        if (ele.nodeName === 'svg') {
+            console.error('该元素没有isEdit属性');
+            return 'false'
+        }
+        return getEleEdit(ele.parentNode)
+    }
+
+    document.querySelector('.body-wrapper > aside .title .cancel')
+        .addEventListener('click', function () {
+            plotTargetPath = null;
+        });
+    document.querySelector('.body-wrapper>aside').addEventListener('click', function (evt) {
+        if (evt.target.nodeName === 'IMG') {
+            let src = evt.target.getAttribute('src');
+            let path = src.substring(5, src.length - 4);
+            console.log('点击了：', path);
+            plotTargetPath = path;
+        }
+    });
+
+    function plotPointUse(x, y) {
         const newUse = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-        newUse.setAttributeNS('http://www.w3.org/1999/xlink', 'href', "#point_fly");
-        newUse.setAttribute("x", "25");
-        newUse.setAttribute("y", "145");
+        newUse.setAttributeNS('http://www.w3.org/1999/xlink', 'href', "#" + plotTargetPath);
+        newUse.setAttribute("x", x);
+        newUse.setAttribute("y", y);
         plotBoard.appendChild(newUse);
+    }
+
+    function plotPointClone(x, y) {
+        let target = plotLib.querySelector('#' + plotTargetPath.replace('/', '_'));
+        let clone = target.cloneNode(true);
+        clone.setAttribute('transform', `translate(${x},${y})`);
+        plotBoard.appendChild(clone)
     }
 </script>
 <style>
@@ -132,8 +172,17 @@
         border-bottom: 2px solid lightcoral;
         height: 56px;
         display: flex;
+        justify-content: space-between;
         align-items: center;
         padding-left: 20px;
+    }
+
+    .body-wrapper > aside .title .cancel {
+        background-color: gray;
+        margin-right: 20px;
+        padding: 10px;
+        border-radius: 10px;
+        cursor: pointer;
     }
 
     .body-wrapper > aside .list .item-title {
@@ -150,7 +199,6 @@
     }
 
     .body-wrapper > aside .list .icon-unit img {
-
         cursor: pointer;
     }
 
@@ -175,6 +223,10 @@
         flex: 1;
         background-color: lightgray;
         border-radius: 10px;
+    }
+
+    #plotBoard .edit-active {
+        cursor:move
     }
 </style>
 </body>
