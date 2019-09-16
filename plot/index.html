@@ -80,6 +80,7 @@
     const plotLib = document.querySelector('#svg-lib');
     const translateRegEx = /translate\((.*?),(.*?)\)/;
     const scaleRegEx = /scale\((.*?),(.*?)\)/;
+    const rotateRegEx = /rotate\((.*?)\)/;
 
     //拖拽相关变量
     let dragTarget = null, dragTargetX = null, dragTargetY = null,
@@ -101,18 +102,18 @@
     }
 
     function dragMove(evt) {
-        if (dragTarget) {
-            console.log('dragMove');
-            let dx = evt.clientX - dragTargetClientX;
-            let dy = evt.clientY - dragTargetClientY;
-            let transform = dragTarget.getAttribute("transform");
-            let ret = translateRegEx.exec(transform);
-            let translateBefore = ret[0];
-            let translateAfter = `translate(${dx + dragTargetX},${dy + dragTargetY})`;
-            transform = transform.replace(translateBefore, translateAfter);
-            console.log('dragMove value:', transform, '/', translateBefore, '/', translateAfter)
-            dragTarget.setAttribute('transform', transform)
-        }
+        if (!dragTarget) return;
+        console.log('dragMove');
+        let dx = evt.clientX - dragTargetClientX;
+        let dy = evt.clientY - dragTargetClientY;
+        let transform = dragTarget.getAttribute("transform");
+        let ret = translateRegEx.exec(transform);
+        let translateBefore = ret[0];
+        let translateAfter = `translate(${dx + dragTargetX},${dy + dragTargetY})`;
+        transform = transform.replace(translateBefore, translateAfter);
+        console.log('dragMove value:', transform, '/', translateBefore, '/', translateAfter)
+        dragTarget.setAttribute('transform', transform)
+
     }
 
     function dragEnd(evt) {
@@ -144,21 +145,22 @@
     }
 
     function scaleMove(evt) {
-        if (scaleTarget) {
-            console.log('scaleMove:', scaleValueX, scaleValueY,
-                scaleTargetClientX, scaleTargetClientY);
-            let dx = evt.clientX - scaleTargetClientX;
-            let scaleX = dx / cx + 1;
-            console.log(dx, cx, scaleX);
+        if (!scaleTarget) return;
 
-            let transform = scaleTarget.getAttribute("transform");
-            let ret = scaleRegEx.exec(transform);
-            let scaleBefore = ret[0];
-            let scaleAfter = `scale(${scaleX},1)`;
-            transform = transform.replace(scaleBefore, scaleAfter);
-            console.log('scaleMove value:', transform, '/', scaleBefore, '/', scaleAfter)
-            scaleTarget.setAttribute('transform', transform)
-        }
+        console.log('scaleMove:', scaleValueX, scaleValueY,
+            scaleTargetClientX, scaleTargetClientY);
+        let dx = evt.clientX - scaleTargetClientX;
+        let scaleX = dx / cx + 1;
+        console.log(dx, cx, scaleX);
+
+        let transform = scaleTarget.getAttribute("transform");
+        let ret = scaleRegEx.exec(transform);
+        let scaleBefore = ret[0];
+        let scaleAfter = `scale(${scaleX},1)`;
+        transform = transform.replace(scaleBefore, scaleAfter);
+        console.log('scaleMove value:', transform, '/', scaleBefore, '/', scaleAfter)
+        scaleTarget.setAttribute('transform', transform)
+
     }
 
     function scaleEnd() {
@@ -167,7 +169,7 @@
     }
 
     //旋转相关变量
-    let rotateTarget = null, rotateCx = null, rotateCy = null,initAngle=null,
+    let rotateTarget = null, rotateCx = null, rotateCy = null, initAngle = null,
         rotateClientX, rotateClientY;
 
     function rotateStart(evt) {
@@ -179,18 +181,56 @@
         rotateClientY = evt.clientY;
         rotateCx = rotateClientX - cx;
         rotateCy = rotateClientY - cy;
-        console.log(rotateTarget, rotateCx, rotateCy, rotateClientX, rotateClientY)
+
+        let transform = rotateTarget.getAttribute("transform");
+        let ret = rotateRegEx.exec(transform);
+        if (ret !== null) {//肯定不
+            initAngle = parseFloat(ret[1]);
+        }
+        console.log(rotateTarget, rotateCx, rotateCy, rotateClientX, rotateClientY, initAngle)
     }
 
-    function rotateMove(evt){
+    function rotateMove(evt) {
+        if (!rotateTarget) return;
         let x = evt.clientX;
         let y = evt.clientY;
+        console.log('rotateMove:', x, y);
+        let center = {x: rotateCx, y: rotateCy}, start = {x: rotateClientX, y: rotateClientY}, end = {x, y};
+        let dAngle = getAngle3(center, start, end);
 
+        let transform = rotateTarget.getAttribute("transform");
+        let ret = rotateRegEx.exec(transform);
+        let rotateBefore = ret[0];
+        let rotateAfter = `rotate(${initAngle + dAngle})`;
+        transform = transform.replace(rotateBefore, rotateAfter);
+        console.log('scaleMove value:', transform, '/', rotateBefore, '/', rotateAfter)
+        rotateTarget.setAttribute('transform', transform)
+
+    }
+
+    function rotateEnd(evt) {
+        rotateTarget = null;
     }
 
     //三点坐标求夹角
-    function getAngle(center,first,second){
+    function getAngle(center, point) {
+        let dx = point.x - center.x;
+        let dy = point.y - center.y;
+        if (dx === 0) {
+            if (dy >= 0) {
+                return 90;
+            } else {
+                return 270
+            }
+        } else if (dx > 0) {
+            return Math.atan(dy / dx) * 180 / Math.PI;
+        } else {
+            return Math.atan(dy / dx) * 180 / Math.PI + 180;
+        }
+    }
 
+    function getAngle3(center, start, end) {
+        return getAngle(center, end) - getAngle(center, start);
     }
 
     plotBoard.addEventListener('click', function (evt) {
@@ -295,6 +335,14 @@
             rotateItem.addEventListener('mousedown', function (evt) {
                 rotateStart(evt);
                 evt.stopPropagation();//停止传播
+            });
+            rotateItem.addEventListener('mousemove', function (evt) {
+                rotateMove(evt);
+                evt.stopPropagation();
+            });
+            rotateItem.addEventListener('mouseout', function (evt) {
+                rotateEnd(evt);
+                evt.stopPropagation();
             })
         }
     }
