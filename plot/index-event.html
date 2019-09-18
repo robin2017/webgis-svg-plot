@@ -127,15 +127,17 @@
     //缩放相关变量
     let scaleTarget = null, scaleTargetX = null, scaleTargetY = null,
         scaleValueX = null, scaleValueY = null, cx = null, cy = null,
-        scaleTargetClientX = null, scaleTargetClientY = null;
+        scaleTargetClientX = null, scaleTargetClientY = null,
+        scaleUnitX = null, scaleUnitY = null;
 
     function scaleStart(evt) {
         if (!isScaleTarget(evt.target)) return false;
         scaleTarget = getEditClassNode(evt.target);
         if (scaleTarget === null) return false;
         console.log('scaleStart');
-        cx = parseFloat(evt.target.getAttribute('cx'));
-        cy = parseFloat(evt.target.getAttribute('cy'));
+        cx = scaleUnitX = parseFloat(evt.target.getAttribute('cx'));
+        cy = scaleUnitY = parseFloat(evt.target.getAttribute('cy'));
+
         scaleTargetClientX = evt.clientX;
         scaleTargetClientY = evt.clientY;
         let {ret} = getTransformRegValue(scaleTarget, 'scale');
