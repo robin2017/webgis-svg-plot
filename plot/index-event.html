@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SVG标绘</title>
+</head>
+<body>
+<header>
+    <h1>SVG标绘</h1>
+</header>
+
+<div class="body-wrapper">
+    <aside>
+        <section class="title">
+            <h2>军标列表</h2>
+            <button class="cancel">取消标绘</button>
+        </section>
+        <section class="list">
+            <h3 class="item-title">点军标</h3>
+            <ul class="item-ul">
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/point/fly.svg" class="icon-content" alt="飞机">
+                        <div>飞机</div>
+                    </div>
+                </li>
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/point/people.svg" class="icon-content" alt="飞机">
+                        <div>人员</div>
+                    </div>
+                </li>
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/point/ship.svg" class="icon-content" alt="飞机">
+                        <div>船只</div>
+                    </div>
+                </li>
+            </ul>
+
+            <h3 class="item-title">线面军标</h3>
+            <ul class="item-ul">
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/xm/line.svg" class="icon-content" alt="飞机">
+                        <div>线段</div>
+                    </div>
+                </li>
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/xm/circle.svg" class="icon-content" alt="飞机">
+                        <div>圆</div>
+                    </div>
+                </li>
+                <li>
+                    <div class="icon-unit">
+                        <img src="icon/xm/rect.svg" class="icon-content" alt="飞机">
+                        <div>矩形</div>
+                    </div>
+                </li>
+            </ul>
+        </section>
+    </aside>
+    <main>
+        <svg id="plotBoard" width="100%" height="100%">
+
+        </svg>
+    </main>
+</div>
+<div id="svg-lib" style="height:0;"></div>
+
+<script src="svgUtils.js"></script>
+<script>
+    console.log('完成svg-lib加载');
+    loadSvg('#svg-lib', './icon/point/point-lib.svg')
+</script>
+<script>
+    let plotTargetPath = null;
+    const plotBoard = document.querySelector('#plotBoard');
+    const plotLib = document.querySelector('#svg-lib');
+    const translateRegEx = /translate\((.*?),(.*?)\)/;
+    const scaleRegEx = /scale\((.*?),(.*?)\)/;
+    const rotateRegEx = /rotate\((.*?)\)/;
+
+    //拖拽相关变量
+    let dragTarget = null, dragTargetX = null, dragTargetY = null,
+        dragTargetClientX = null, dragTargetClientY = null;
+
+
+    function dragStart(evt) {
+        dragTarget = getEditClassNode(evt.target);
+        if (dragTarget === null) return false;
+        console.log('dragStart');
+        dragTargetClientX = evt.clientX;
+        dragTargetClientY = evt.clientY;
+        let transform = dragTarget.getAttribute("transform");
+        let ret = translateRegEx.exec(transform);
+        console.log(ret[0]);
+        if (ret !== null) {//肯定有
+            dragTargetX = parseFloat(ret[1]);
+            dragTargetY = parseFloat(ret[2]);
+            console.log('dragStart:', dragTarget, dragTargetX, dragTargetY, dragTargetClientX, dragTargetClientY)
+        }
+        return true;
+    }
+
+    function dragMove(evt) {
+        if (dragTarget === null) return false;
+        console.log('dragMove');
+        let dx = evt.clientX - dragTargetClientX;
+        let dy = evt.clientY - dragTargetClientY;
+        let transform = dragTarget.getAttribute("transform");
+        let ret = translateRegEx.exec(transform);
+        let translateBefore = ret[0];
+        let translateAfter = `translate(${dx + dragTargetX},${dy + dragTargetY})`;
+        transform = transform.replace(translateBefore, translateAfter);
+        console.log('dragMove value:', transform, '/', translateBefore, '/', translateAfter)
+        dragTarget.setAttribute('transform', transform)
+
+    }
+
+    function dragEnd(evt) {
+        if (dragTarget === null) return false;
+        console.log('dragEnd');
+        dragTarget = null;
+        return true;
+    }
+
+    //缩放相关变量
+    let scaleTarget = null, scaleTargetX = null, scaleTargetY = null,
+        scaleValueX = null, scaleValueY = null, cx = null, cy = null,
+        scaleTargetClientX = null, scaleTargetClientY = null;
+
+    function isScaleTarget(ele) {
+        let _class = ele.getAttribute('class');
+        if (_class !== null && _class.startsWith('control-scale-item')) {
+            return true
+        }
+        return false
+    }
+
+    function scaleStart(evt) {
+        if (!isScaleTarget(evt.target)) return false;
+        scaleTarget = getEditClassNode(evt.target);
+        if (scaleTarget === null) return false;
+        console.log('scaleStart');
+        cx = parseFloat(evt.target.getAttribute('cx'));
+        cy = parseFloat(evt.target.getAttribute('cy'));
+        scaleTargetClientX = evt.clientX;
+        scaleTargetClientY = evt.clientY;
+        let transform = scaleTarget.getAttribute("transform");
+        let ret = scaleRegEx.exec(transform);
+        if (ret !== null) {
+            scaleValueX = parseFloat(ret[1]);
+            scaleValueY = parseFloat(ret[2]);
+        } else {
+            scaleValueX = scaleValueY = 1;
+        }
+        console.log('scaleStart value:', cx, cy, scaleTarget, scaleValueX, scaleValueY)
+        return true;
+    }
+
+    function scaleMove(evt) {
+        if (scaleTarget === null) return false;
+        console.log('scaleMove:', scaleValueX, scaleValueY,
+            scaleTargetClientX, scaleTargetClientY);
+        let dx = evt.clientX - scaleTargetClientX;
+        let scaleX = dx / cx + 1;
+        console.log(dx, cx, scaleX);
+
+        let transform = scaleTarget.getAttribute("transform");
+        let ret = scaleRegEx.exec(transform);
+        let scaleBefore = ret[0];
+        let scaleAfter = `scale(${scaleX},1)`;
+        transform = transform.replace(scaleBefore, scaleAfter);
+        console.log('scaleMove value:', transform, '/', scaleBefore, '/', scaleAfter)
+        scaleTarget.setAttribute('transform', transform)
+        return true;
+    }
+
+    function scaleEnd() {
+        if (scaleTarget === null) return false;
+        console.log('scaleEnd')
+        scaleTarget = null;
+        return true;
+    }
+
+    //旋转相关变量
+    let rotateTarget = null, rotateCx = null, rotateCy = null, initAngle = null,
+        rotateClientX, rotateClientY;
+
+    function isRotateTarget(ele) {
+        let _class = ele.getAttribute('class');
+        if (_class !== null && _class === 'control-rotate-item') {
+            return true
+        }
+        return false
+    }
+
+    function rotateStart(evt) {
+        if (!isRotateTarget(evt.target)) return false;
+        rotateTarget = getEditClassNode(evt.target);
+        if (rotateTarget === null) return false;
+        console.log('rotateStart');
+
+        let transform = rotateTarget.getAttribute("transform");
+        let ret = rotateRegEx.exec(transform);
+        if (ret !== null) { //肯定不
+            initAngle = parseFloat(ret[1]);
+        }
+
+
+        let dis = Math.abs(parseFloat(evt.target.getAttribute('cy')));
+        let cx = dis*Math.sin(initAngle*Math.PI/180);
+        let cy = dis*Math.cos(initAngle*Math.PI/180);
+        rotateClientX = evt.clientX;
+        rotateClientY = evt.clientY;
+        rotateCx = rotateClientX - cx;
+        rotateCy = rotateClientY + cy;
+        console.log('计算中心点：',rotateClientX,cx,rotateClientY,cy)
+
+
+        console.log(rotateTarget, rotateCx, rotateCy, rotateClientX, rotateClientY, initAngle)
+        return true;
+
+    }
+
+    function rotateMove(evt) {
+        if (rotateTarget === null) return false;
+        console.log('rotateMove');
+        let x = evt.clientX;
+        let y = evt.clientY;
+        let center = {x: rotateCx, y: rotateCy}, start = {x: rotateClientX, y: rotateClientY}, end = {x, y};
+        let dAngle =0- getAngle3(center, start, end);
+
+        let transform = rotateTarget.getAttribute("transform");
+        let ret = rotateRegEx.exec(transform);
+        let rotateBefore = ret[0];
+        let rotateAfter = `rotate(${initAngle + dAngle})`;
+
+        console.log('初始角度和差值：', initAngle, dAngle)
+        transform = transform.replace(rotateBefore, rotateAfter);
+        console.log('scaleMove value:', transform, '/', rotateBefore, '/', rotateAfter)
+        rotateTarget.setAttribute('transform', transform)
+        return true;
+    }
+
+    function rotateEnd(evt) {
+        if (rotateTarget === null) return false;
+        console.log('rotateEnd');
+        rotateTarget = null;
+        return true;
+    }
+
+    //三点坐标求夹角
+    function getAngle(center, point) {
+        let dx = point.x - center.x;
+        let dy = -(point.y - center.y);
+        if (dx === 0) {
+            if (dy >= 0) {
+                return 90;
+            } else {
+                return 270
+            }
+        } else if (dx > 0) {
+            return Math.atan(dy / dx) * 180 / Math.PI;
+        } else {
+            return Math.atan(dy / dx) * 180 / Math.PI + 180;
+        }
+    }
+
+    function getAngle3(center, start, end) {
+
+        let angle1 = getAngle(center, end);
+        let angle2 = getAngle(center, start);
+        console.log('中点，开始点，结束点:', center, start, end, angle1, angle2);
+        return angle1 - angle2
+    }
+
+    plotBoard.addEventListener('click', function (evt) {
+        if (plotTargetPath !== null && evt.target.nodeName === "svg") {
+            let x = evt.clientX - evt.target.getBoundingClientRect().left;
+            let y = evt.clientY - evt.target.getBoundingClientRect().top;
+            // plotPointUse(x, y)
+            plotPointClone(x, y)
+        } else if (evt.target.nodeName !== "svg" && plotTargetPath === null) {//选中目标，
+            console.log('选中目标')
+            let target = evt.target;
+            if (getEleState(target) === 'edit-inactive') {//状态不可编辑
+                let node = getEditClassNode(target);
+                node.setAttribute('class', 'edit-active')
+            } else if (getEleState(target) === 'edit-active') {//状态可编辑
+                //dragStart(evt)
+            }
+        } else if (plotTargetPath === null && evt.target.nodeName === "svg") {//全部状态不可编辑
+            plotBoard.childNodes.forEach(node => {
+                node.setAttribute && node.setAttribute('class', "edit-inactive");
+            })
+        }
+    });
+
+
+    function getEleState(ele) {//得到元素的编辑状态
+        console.log(ele.nodeName)
+        let isActive = ele.getAttribute('class');
+        if (isActive !== null && isActive.startsWith("edit")) {
+            return isActive
+        }
+        if (ele.nodeName === 'svg') {
+            console.error('该元素没有isEdit属性');
+            return 'false'
+        }
+        return getEleState(ele.parentNode)
+    }
+
+    //获取包含edit类型的节点
+    function getEditClassNode(ele) {
+        let isActive = ele.getAttribute('class');
+        if (isActive !== null && isActive.startsWith("edit")) {
+            return ele
+        }
+        if (ele.nodeName === 'svg') {
+            return null
+        }
+        return getEditClassNode(ele.parentNode)
+    }
+
+    document.querySelector('.body-wrapper > aside .title .cancel')
+        .addEventListener('click', function () {
+            plotTargetPath = null;
+        });
+    document.querySelector('.body-wrapper>aside').addEventListener('click', function (evt) {
+        if (evt.target.nodeName === 'IMG') {
+            let src = evt.target.getAttribute('src');
+            let path = src.substring(5, src.length - 4);
+            console.log('点击了：', path);
+            plotTargetPath = path;
+        }
+    });
+
+
+    function plotPointClone(x, y) {
+        let target = plotLib.querySelector('#' + plotTargetPath.replace('/', '_'));
+        let clone = target.cloneNode(true);
+        clone.setAttribute('transform', `translate(${x},${y}) scale(1,1) rotate(0)`);
+        plotBoard.appendChild(clone);
+        // let controlGroup = clone.querySelector('.control-group');
+        // controlGroup.addEventListener('mousedown', function (evt) {
+        //     console.log('控制点被按下：', evt.target);
+        //     scaleStart(evt);
+        //     evt.stopPropagation();//停止传播
+        // });
+        // controlGroup.addEventListener('mousemove', function (evt) {
+        //     scaleMove(evt);
+        //     evt.stopPropagation();
+        // });
+        // controlGroup.addEventListener('mouseup', function (evt) {
+        //     scaleEnd();
+        //     evt.stopPropagation();
+        // })
+
+        // let rotateItem = clone.querySelector('.control-group .control-item-rotate')
+        // if (rotateItem) {
+        //     rotateItem.addEventListener('mousedown', function (evt) {
+        //         rotateStart(evt);
+        //         evt.stopPropagation();//停止传播
+        //     });
+        //     rotateItem.addEventListener('mousemove', function (evt) {
+        //         rotateMove(evt);
+        //         evt.stopPropagation();
+        //     });
+        //     rotateItem.addEventListener('mouseout', function (evt) {
+        //         rotateEnd(evt);
+        //         evt.stopPropagation();
+        //     })
+        // }
+    }
+
+
+    /**
+     * 事件优先级：旋转，缩放，平移
+     *
+     * */
+    const eventTermination = {};
+
+    function startEvent(type) {
+        eventTermination[type] = 1
+    }
+
+    function stopEvent(type) {
+        eventTermination[type] = 0;
+    }
+
+    function isStop(type) {
+        return eventTermination[type] === 0
+    }
+
+    //第0级：初始化
+    plotBoard.addEventListener('mousedown', function (evt) {
+        startEvent('mousedown')
+    });
+    plotBoard.addEventListener('mousemove', function (evt) {
+        startEvent('mousemove')
+    });
+    plotBoard.addEventListener('mouseup', function (evt) {
+        startEvent('mouseup')
+    })
+
+    //第一级：旋转
+    plotBoard.addEventListener('mousedown', function (evt) {
+        if (isStop('mousedown')) return;
+        if (rotateStart(evt)) stopEvent('mousedown');
+    });
+    plotBoard.addEventListener('mousemove', function (evt) {
+        if (isStop('mousemove')) return;
+        if (rotateMove(evt)) stopEvent('mousemove')
+
+    });
+    plotBoard.addEventListener('mouseup', function (evt) {
+        if (isStop('mouseup')) return;
+        rotateEnd(evt);
+        evt.stopPropagation();
+    })
+
+
+    //第二级别：缩放
+    plotBoard.addEventListener('mousedown', function (evt) {
+        if (isStop('mousedown')) return;
+        if (scaleStart(evt)) stopEvent('mousedown');
+    });
+    plotBoard.addEventListener('mousemove', function (evt) {
+        if (isStop('mousemove')) return;
+        if (scaleMove(evt)) stopEvent('mousemove')
+    });
+    plotBoard.addEventListener('mouseup', function (evt) {
+        if (isStop('mouseup')) return;
+        scaleEnd();
+        evt.stopPropagation();
+    })
+
+    //第三级别:拖拽
+    plotBoard.addEventListener('mousedown', function (evt) {
+        if (isStop('mousedown')) return;
+        if (evt.target.nodeName !== "svg"
+            && plotTargetPath === null
+            && getEleState(evt.target) === 'edit-active') {
+            dragStart(evt)
+        }
+    });
+
+
+    plotBoard.addEventListener('mousemove', function (evt) {
+        if (isStop('mousemove')) return;
+        dragMove(evt);
+    });
+    plotBoard.addEventListener('mouseup', function (evt) {
+        if (isStop('mouseup')) return;
+        dragEnd(evt);
+    });
+</script>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        height: 100%;
+    }
+
+    header {
+        height: 100px;
+        display: flex;
+        align-items: center;
+        margin-left: 30px;
+    }
+
+    .body-wrapper {
+        display: flex;
+        height: calc(100% - 140px);
+        margin: 20px;
+    }
+
+    .body-wrapper > aside {
+        width: 400px;
+        background-color: #ede;
+        border-radius: 10px;
+    }
+
+    .body-wrapper > aside .title {
+        border-bottom: 2px solid lightcoral;
+        height: 56px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-left: 20px;
+    }
+
+    .body-wrapper > aside .title .cancel {
+        background-color: gray;
+        margin-right: 20px;
+        padding: 10px;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    .body-wrapper > aside .list .item-title {
+        margin: 10px;
+    }
+
+    .body-wrapper > aside .list .item-ul {
+        margin-left: 10px;
+    }
+
+    .body-wrapper > aside .list .icon-unit {
+        display: inline-block;
+
+    }
+
+    .body-wrapper > aside .list .icon-unit img {
+        cursor: pointer;
+    }
+
+    .body-wrapper > aside .list .icon-unit div {
+        display: flex;
+        justify-content: center;
+    }
+
+    .body-wrapper > aside .list ul li {
+        display: inline;
+        list-style-type: none;
+    }
+
+    .body-wrapper > aside .list .icon-content {
+        height: 60px;
+        border: 1px solid black;
+        border-radius: 4px;
+    }
+
+    .body-wrapper > main {
+        margin-left: 20px;
+        flex: 1;
+        background-color: lightgray;
+        border-radius: 10px;
+    }
+
+    /*操作规范，参见：chap7、svg元素拖动*/
+
+    /*不可编辑状态*/
+    #plotBoard .edit-inactive {
+        cursor: pointer;
+    }
+
+    #plotBoard .edit-inactive .control-group {
+        display: none;
+    }
+
+    /*可编辑状态*/
+    #plotBoard .edit-active {
+        cursor: move;
+    }
+
+    #plotBoard .edit-active .control-group .control-scale-item-1 {
+        cursor: w-resize;
+        /*cursor:url("http://ued.taobao.com/blog/wp-content/themes/taobaoued/images/cursor.ico") ,auto;*/
+    }
+
+    #plotBoard .edit-active .control-group .control-scale-item-2 {
+        cursor: s-resize;
+    }
+
+    #plotBoard .edit-active .control-group .control-scale-item-3 {
+        cursor: ne-resize;
+    }
+
+    #plotBoard .edit-active .control-group .control-scale-item-4 {
+        cursor: se-resize;
+    }
+
+    #plotBoard .edit-active .control-group .control-rotate-item {
+        cursor:crosshair;
+        fill: yellow;
+        /*cursor: url("rotate.ico"), auto;*/
+
+    }
+</style>
+</body>
+
+</html>

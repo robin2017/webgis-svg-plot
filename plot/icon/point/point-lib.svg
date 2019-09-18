@@ -8,23 +8,18 @@
             <line x1="-22" y1="-10" x2="22" y2="-30"></line>
             <line x1="0" y1="-20" x2="0" y2="0"></line>
             <polygon points="0,0 -16,16 16,16" fill="none"></polygon>
-            <g class="center-point" fill="red">
-                <circle cx="0" cy="0" r="2"></circle>
-            </g>
             <!--样式只能为control-group-->
             <g id="fly-control" class="control-group" stroke-width="1" fill="blue">
-                <circle cx="-32" cy="-40" r="3" class="control-item-4"></circle>
-                <circle cx="0" cy="-40" r="3" class="control-item-2"></circle>
-                <circle cx="32" cy="-40" r="3" class="control-item-3"></circle>
-                <circle cx="32" cy="-8" r="3" class="control-item-1"></circle>
-                <circle cx="32" cy="24" r="3" class="control-item-4"></circle>
-                <circle cx="0" cy="24" r="3" class="control-item-2"></circle>
-                <circle cx="-32" cy="24" r="3" class="control-item-3"></circle>
-                <circle cx="-32" cy="-8" r="3" class="control-item-1"></circle>
-            </g>
-
-            <g class="control-group">
-                <circle cx="0" cy="-60" r="3" class="control-item-rotate"></circle>
+                <circle cx="0" cy="0" r="2" fill="red" class="control-center-point"></circle>
+                <circle cx="-32" cy="-40" r="3" class="control-scale-item-4"></circle>
+                <circle cx="0" cy="-40" r="3" class="control-scale-item-2"></circle>
+                <circle cx="32" cy="-40" r="3" class="control-scale-item-3"></circle>
+                <circle cx="32" cy="-8" r="3" class="control-scale-item-1"></circle>
+                <circle cx="32" cy="24" r="3" class="control-scale-item-4"></circle>
+                <circle cx="0" cy="24" r="3" class="control-scale-item-2"></circle>
+                <circle cx="-32" cy="24" r="3" class="control-scale-item-3"></circle>
+                <circle cx="-32" cy="-8" r="3" class="control-scale-item-1"></circle>
+                <circle cx="0" cy="-60" r="3" class="control-rotate-item"></circle>
             </g>
         </g>
         <g id="point_people" class="edit-inactive" stroke="black" stroke-width="2">
