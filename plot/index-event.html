@@ -93,8 +93,7 @@
         console.log('dragStart');
         dragTargetClientX = evt.clientX;
         dragTargetClientY = evt.clientY;
-        let transform = dragTarget.getAttribute("transform");
-        let ret = translateRegEx.exec(transform);
+        let {ret} = getTransformRegValue(dragTarget, 'translate');
         console.log(ret[0]);
         if (ret !== null) {//肯定有
             dragTargetX = parseFloat(ret[1]);
@@ -109,8 +108,7 @@
         console.log('dragMove');
         let dx = evt.clientX - dragTargetClientX;
         let dy = evt.clientY - dragTargetClientY;
-        let transform = dragTarget.getAttribute("transform");
-        let ret = translateRegEx.exec(transform);
+        let {transform, ret} = getTransformRegValue(dragTarget, 'translate');
         let translateBefore = ret[0];
         let translateAfter = `translate(${dx + dragTargetX},${dy + dragTargetY})`;
         transform = transform.replace(translateBefore, translateAfter);
@@ -131,14 +129,6 @@
         scaleValueX = null, scaleValueY = null, cx = null, cy = null,
         scaleTargetClientX = null, scaleTargetClientY = null;
 
-    function isScaleTarget(ele) {
-        let _class = ele.getAttribute('class');
-        if (_class !== null && _class.startsWith('control-scale-item')) {
-            return true
-        }
-        return false
-    }
-
     function scaleStart(evt) {
         if (!isScaleTarget(evt.target)) return false;
         scaleTarget = getEditClassNode(evt.target);
@@ -148,8 +138,7 @@
         cy = parseFloat(evt.target.getAttribute('cy'));
         scaleTargetClientX = evt.clientX;
         scaleTargetClientY = evt.clientY;
-        let transform = scaleTarget.getAttribute("transform");
-        let ret = scaleRegEx.exec(transform);
+        let {ret} = getTransformRegValue(scaleTarget, 'scale');
         if (ret !== null) {
             scaleValueX = parseFloat(ret[1]);
             scaleValueY = parseFloat(ret[2]);
@@ -168,8 +157,9 @@
         let scaleX = dx / cx + 1;
         console.log(dx, cx, scaleX);
 
-        let transform = scaleTarget.getAttribute("transform");
-        let ret = scaleRegEx.exec(transform);
+
+        let {transform, ret} = getTransformRegValue(scaleTarget, 'scale');
+
         let scaleBefore = ret[0];
         let scaleAfter = `scale(${scaleX},1)`;
         transform = transform.replace(scaleBefore, scaleAfter);
@@ -189,13 +179,6 @@
     let rotateTarget = null, rotateCx = null, rotateCy = null, initAngle = null,
         rotateClientX, rotateClientY;
 
-    function isRotateTarget(ele) {
-        let _class = ele.getAttribute('class');
-        if (_class !== null && _class === 'control-rotate-item') {
-            return true
-        }
-        return false
-    }
 
     function rotateStart(evt) {
         if (!isRotateTarget(evt.target)) return false;
@@ -203,26 +186,22 @@
         if (rotateTarget === null) return false;
         console.log('rotateStart');
 
-        let transform = rotateTarget.getAttribute("transform");
-        let ret = rotateRegEx.exec(transform);
+        let {ret} = getTransformRegValue(rotateTarget, 'rotate');
+
         if (ret !== null) { //肯定不
             initAngle = parseFloat(ret[1]);
         }
 
-
         let dis = Math.abs(parseFloat(evt.target.getAttribute('cy')));
-        let cx = dis*Math.sin(initAngle*Math.PI/180);
-        let cy = dis*Math.cos(initAngle*Math.PI/180);
+        let cx = dis * Math.sin(initAngle * Math.PI / 180);
+        let cy = dis * Math.cos(initAngle * Math.PI / 180);
         rotateClientX = evt.clientX;
         rotateClientY = evt.clientY;
         rotateCx = rotateClientX - cx;
         rotateCy = rotateClientY + cy;
-        console.log('计算中心点：',rotateClientX,cx,rotateClientY,cy)
-
-
+        console.log('计算中心点：', rotateClientX, cx, rotateClientY, cy)
         console.log(rotateTarget, rotateCx, rotateCy, rotateClientX, rotateClientY, initAngle)
         return true;
-
     }
 
     function rotateMove(evt) {
@@ -231,10 +210,11 @@
         let x = evt.clientX;
         let y = evt.clientY;
         let center = {x: rotateCx, y: rotateCy}, start = {x: rotateClientX, y: rotateClientY}, end = {x, y};
-        let dAngle =0- getAngle3(center, start, end);
+        let dAngle = 0 - getAngle3(center, start, end);
 
-        let transform = rotateTarget.getAttribute("transform");
-        let ret = rotateRegEx.exec(transform);
+        let {transform, ret} = getTransformRegValue(rotateTarget, 'rotate');
+
+
         let rotateBefore = ret[0];
         let rotateAfter = `rotate(${initAngle + dAngle})`;
 
@@ -250,6 +230,65 @@
         console.log('rotateEnd');
         rotateTarget = null;
         return true;
+    }
+
+
+    document.querySelector('.body-wrapper > aside .title .cancel')
+        .addEventListener('click', function () {
+            plotTargetPath = null;
+        });
+    document.querySelector('.body-wrapper>aside').addEventListener('click', function (evt) {
+        if (evt.target.nodeName === 'IMG') {
+            let src = evt.target.getAttribute('src');
+            let path = src.substring(5, src.length - 4);
+            console.log('点击了：', path);
+            plotTargetPath = path;
+        }
+    });
+
+    function plotPointClone(x, y) {
+        let target = plotLib.querySelector('#' + plotTargetPath.replace('/', '_'));
+        let clone = target.cloneNode(true);
+        clone.setAttribute('transform', `translate(${x},${y}) scale(1,1) rotate(0)`);
+        plotBoard.appendChild(clone);
+    }
+
+    /**
+     *PART1:基础函数
+     * */
+    function getTransformRegValue(target, type) {
+        let transform = target.getAttribute("transform");
+        let ret = null;
+        if (type === 'rotate') {
+            ret = rotateRegEx.exec(transform);
+        } else if (type === 'scale') {
+            ret = scaleRegEx.exec(transform)
+        } else if (type === 'translate') {
+            ret = translateRegEx.exec(transform)
+        } else {
+            console.error('reg type 错误')
+        }
+        return {
+            transform, ret
+        }
+    }
+
+    //元素是不是缩放控制点
+    function isScaleTarget(ele) {
+        let _class = ele.getAttribute('class');
+        if (_class !== null && _class.startsWith('control-scale-item')) {
+            return true
+        }
+        return false
+    }
+
+    //元素是不是旋转控制点
+    function isRotateTarget(ele) {
+        let _class = ele.getAttribute('class');
+        if (_class !== null && _class === 'control-rotate-item') {
+            return true
+        }
+        return false
     }
 
     //三点坐标求夹角
@@ -270,37 +309,14 @@
     }
 
     function getAngle3(center, start, end) {
-
         let angle1 = getAngle(center, end);
         let angle2 = getAngle(center, start);
         console.log('中点，开始点，结束点:', center, start, end, angle1, angle2);
         return angle1 - angle2
     }
 
-    plotBoard.addEventListener('click', function (evt) {
-        if (plotTargetPath !== null && evt.target.nodeName === "svg") {
-            let x = evt.clientX - evt.target.getBoundingClientRect().left;
-            let y = evt.clientY - evt.target.getBoundingClientRect().top;
-            // plotPointUse(x, y)
-            plotPointClone(x, y)
-        } else if (evt.target.nodeName !== "svg" && plotTargetPath === null) {//选中目标，
-            console.log('选中目标')
-            let target = evt.target;
-            if (getEleState(target) === 'edit-inactive') {//状态不可编辑
-                let node = getEditClassNode(target);
-                node.setAttribute('class', 'edit-active')
-            } else if (getEleState(target) === 'edit-active') {//状态可编辑
-                //dragStart(evt)
-            }
-        } else if (plotTargetPath === null && evt.target.nodeName === "svg") {//全部状态不可编辑
-            plotBoard.childNodes.forEach(node => {
-                node.setAttribute && node.setAttribute('class', "edit-inactive");
-            })
-        }
-    });
-
-
-    function getEleState(ele) {//得到元素的编辑状态
+    //得到元素的编辑状态
+    function getEleState(ele) {
         console.log(ele.nodeName)
         let isActive = ele.getAttribute('class');
         if (isActive !== null && isActive.startsWith("edit")) {
@@ -325,62 +341,32 @@
         return getEditClassNode(ele.parentNode)
     }
 
-    document.querySelector('.body-wrapper > aside .title .cancel')
-        .addEventListener('click', function () {
-            plotTargetPath = null;
-        });
-    document.querySelector('.body-wrapper>aside').addEventListener('click', function (evt) {
-        if (evt.target.nodeName === 'IMG') {
-            let src = evt.target.getAttribute('src');
-            let path = src.substring(5, src.length - 4);
-            console.log('点击了：', path);
-            plotTargetPath = path;
-        }
-    });
-
-
-    function plotPointClone(x, y) {
-        let target = plotLib.querySelector('#' + plotTargetPath.replace('/', '_'));
-        let clone = target.cloneNode(true);
-        clone.setAttribute('transform', `translate(${x},${y}) scale(1,1) rotate(0)`);
-        plotBoard.appendChild(clone);
-        // let controlGroup = clone.querySelector('.control-group');
-        // controlGroup.addEventListener('mousedown', function (evt) {
-        //     console.log('控制点被按下：', evt.target);
-        //     scaleStart(evt);
-        //     evt.stopPropagation();//停止传播
-        // });
-        // controlGroup.addEventListener('mousemove', function (evt) {
-        //     scaleMove(evt);
-        //     evt.stopPropagation();
-        // });
-        // controlGroup.addEventListener('mouseup', function (evt) {
-        //     scaleEnd();
-        //     evt.stopPropagation();
-        // })
-
-        // let rotateItem = clone.querySelector('.control-group .control-item-rotate')
-        // if (rotateItem) {
-        //     rotateItem.addEventListener('mousedown', function (evt) {
-        //         rotateStart(evt);
-        //         evt.stopPropagation();//停止传播
-        //     });
-        //     rotateItem.addEventListener('mousemove', function (evt) {
-        //         rotateMove(evt);
-        //         evt.stopPropagation();
-        //     });
-        //     rotateItem.addEventListener('mouseout', function (evt) {
-        //         rotateEnd(evt);
-        //         evt.stopPropagation();
-        //     })
-        // }
-    }
-
-
     /**
+     * PART0:所有事件统一在plotBoard上进行处理
      * 事件优先级：旋转，缩放，平移
      *
      * */
+    plotBoard.addEventListener('click', function (evt) {
+        if (plotTargetPath !== null && evt.target.nodeName === "svg") {
+            let x = evt.clientX - evt.target.getBoundingClientRect().left;
+            let y = evt.clientY - evt.target.getBoundingClientRect().top;
+            // plotPointUse(x, y)
+            plotPointClone(x, y)
+        } else if (evt.target.nodeName !== "svg" && plotTargetPath === null) {//选中目标，
+            console.log('选中目标')
+            let target = evt.target;
+            if (getEleState(target) === 'edit-inactive') {//状态不可编辑
+                let node = getEditClassNode(target);
+                node.setAttribute('class', 'edit-active')
+            } else if (getEleState(target) === 'edit-active') {//状态可编辑
+                //dragStart(evt)
+            }
+        } else if (plotTargetPath === null && evt.target.nodeName === "svg") {//全部状态不可编辑
+            plotBoard.childNodes.forEach(node => {
+                node.setAttribute && node.setAttribute('class', "edit-inactive");
+            })
+        }
+    });
     const eventTermination = {};
 
     function startEvent(type) {
@@ -404,8 +390,7 @@
     });
     plotBoard.addEventListener('mouseup', function (evt) {
         startEvent('mouseup')
-    })
-
+    });
     //第一级：旋转
     plotBoard.addEventListener('mousedown', function (evt) {
         if (isStop('mousedown')) return;
@@ -414,15 +399,11 @@
     plotBoard.addEventListener('mousemove', function (evt) {
         if (isStop('mousemove')) return;
         if (rotateMove(evt)) stopEvent('mousemove')
-
     });
     plotBoard.addEventListener('mouseup', function (evt) {
         if (isStop('mouseup')) return;
-        rotateEnd(evt);
-        evt.stopPropagation();
-    })
-
-
+        if (rotateEnd(evt)) stopEvent('mouseup')
+    });
     //第二级别：缩放
     plotBoard.addEventListener('mousedown', function (evt) {
         if (isStop('mousedown')) return;
@@ -434,11 +415,10 @@
     });
     plotBoard.addEventListener('mouseup', function (evt) {
         if (isStop('mouseup')) return;
-        scaleEnd();
-        evt.stopPropagation();
-    })
+        if (scaleEnd(evt)) stopEvent('mouseup')
 
-    //第三级别:拖拽
+    });
+    //第三级别:拖拽,最后优先级，不用stopEvent
     plotBoard.addEventListener('mousedown', function (evt) {
         if (isStop('mousedown')) return;
         if (evt.target.nodeName !== "svg"
@@ -447,8 +427,6 @@
             dragStart(evt)
         }
     });
-
-
     plotBoard.addEventListener('mousemove', function (evt) {
         if (isStop('mousemove')) return;
         dragMove(evt);
@@ -578,7 +556,7 @@
     }
 
     #plotBoard .edit-active .control-group .control-rotate-item {
-        cursor:crosshair;
+        cursor: crosshair;
         fill: yellow;
         /*cursor: url("rotate.ico"), auto;*/
 
