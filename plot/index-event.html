@@ -249,7 +249,7 @@
     function plotPointClone(x, y) {
         let target = plotLib.querySelector('#' + plotTargetPath.replace('/', '_'));
         let clone = target.cloneNode(true);
-        clone.setAttribute('transform', `translate(${x},${y}) scale(1,1) rotate(0)`);
+        clone.setAttribute('transform', `translate(${x},${y}) rotate(0) scale(1,1)`);
         plotBoard.appendChild(clone);
     }
 
