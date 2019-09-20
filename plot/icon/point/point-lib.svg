@@ -3,11 +3,12 @@
      xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
         <!--样式只能为edit-active/edit-inactive-->
-        <g id="point_fly" class="edit-inactive" stroke="black" stroke-width="2">
-            <line x1="-22" y1="-30" x2="22" y2="-10"></line>
-            <line x1="-22" y1="-10" x2="22" y2="-30"></line>
-            <line x1="0" y1="-20" x2="0" y2="0"></line>
-            <polygon points="0,0 -16,16 16,16" fill="none"></polygon>
+        <g id="point_fly" class="edit-inactive" stroke="black" stroke-width="2"
+           vector-effect="non-scaling-stroke">
+            <line x1="-22" y1="-30" x2="22" y2="-10" vector-effect="non-scaling-stroke"></line>
+            <line x1="-22" y1="-10" x2="22" y2="-30" vector-effect="non-scaling-stroke"></line>
+            <line x1="0" y1="-20" x2="0" y2="0" vector-effect="non-scaling-stroke"></line>
+            <polygon points="0,0 -16,16 16,16" fill="none" vector-effect="non-scaling-stroke"></polygon>
             <!--样式只能为control-group-->
             <g id="fly-control" class="control-group" stroke-width="1" fill="blue">
                 <circle cx="0" cy="0" r="2" fill="red" class="control-center-point"></circle>
