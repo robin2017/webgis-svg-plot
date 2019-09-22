@@ -22,8 +22,11 @@
 </head>
 <body>
 <div id='map'></div>
+<div id="plotMount"></div>
 <script src="js/layers.js"></script>
+<script src="js/htmlUtils.js"></script>
 <script>
+    loadHtml('#plotMount','html/plot.html');
     var map = new mapboxgl.Map({
         container: 'map',
         center: [105.7350860781, 34.3459367715],
