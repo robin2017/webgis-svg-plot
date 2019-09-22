@@ -160,9 +160,9 @@
             scaleValueX = scaleValueY = 1;
         }
 
-        //1、point的位置
-        scaleTargetClientX = evt.clientX;
-        scaleTargetClientY = evt.clientY;
+        //1、point的位置（误差大，应为点的不一定是圆的正中心）
+        scaleTargetClientX = getControlCenter(evt, 'x');
+        scaleTargetClientY = getControlCenter(evt, 'y');
         /**
          * 2、center的位置(错误，和角度，scale都有关系)
          * 这个是重点问题
@@ -179,7 +179,7 @@
         }
         scaleTargetCenterX = tranX + svgLeft;
         scaleTargetCenterY = tranY + svgTop;
-        console.log('hhhhhhhhh:', scaleTargetCenterX, scaleTargetCenterY,tranX, svgLeft)
+        console.log('hhhhhhhhh:', scaleTargetCenterX, scaleTargetCenterY, tranX, svgLeft)
 
         //开始的
         // scaleTargetCenterX = scaleTargetClientX - cx;
@@ -333,6 +333,17 @@
     /**
      *PART1:基础函数
      * */
+    function getControlCenter(evt, type) {
+        let bound = evt.target.getBoundingClientRect();
+        if (type === 'x') {
+            return bound.left + bound.width / 2
+        } else if (type === 'y') {
+            return bound.top + bound.height / 2
+        } else {
+            throw new Error('参数输入错误')
+        }
+    }
+
     function getTransformRegValue(target, type) {
         let transform = target.getAttribute("transform");
         let ret = null;
