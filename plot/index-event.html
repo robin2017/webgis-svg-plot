@@ -170,19 +170,21 @@
          * 求起始点centerX,centerY
          *  计算太麻烦，能力不足，使用全局变量吧
          * */
-        let {retCC} = getTransformRegValue(scaleTarget, 'translate');
-        let tranX,tranY;
-        console.log(ret[0]);
-        if (retCC !== null) {//肯定有
-            tranX = parseFloat(ret[1]);
-            tranY = parseFloat(ret[2]);
-        }
+            //现在的
+        // let {retCC} = getTransformRegValue(scaleTarget, 'translate');
+        // let tranX, tranY;
+        // if (retCC !== null) {//肯定有
+        //     tranX = parseFloat(retCC[1]);
+        //     tranY = parseFloat(retCC[2]);
+        // }
+        // scaleTargetCenterX = tranX + svgLeft;
+        // scaleTargetCenterY = tranY + svgTop;
+        // console.log('hhhhhhhhh:', scaleTargetCenterX, scaleTargetCenterY,tranX, svgLeft)
 
-
-
-        scaleTargetCenterX = tranX +svgLeft;
-        scaleTargetCenterY = tranY+svgTop;
-        console.log('hhhhhhhhh:',scaleTargetCenterX,scaleTargetCenterY)
+        //开始的
+        scaleTargetCenterX = scaleTargetClientX - cx;
+        scaleTargetCenterY = scaleTargetClientY - cy;
+        console.log('jjjjjjjj:', scaleTargetCenterX, scaleTargetCenterY, scaleTargetClientX, cx)
 
         //5、获取投影
         const {xx, yy} = getProjective({x: scaleTargetCenterX, y: scaleTargetCenterY}, {
