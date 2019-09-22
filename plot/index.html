@@ -585,6 +585,13 @@
 
     /*操作规范，参见：chap7、svg元素拖动*/
 
+    #plotBoard g{
+        stroke:black;
+        stroke-width:2;
+    }
+    #plotBoard .show-item{
+        vector-effect:non-scaling-stroke;
+    }
     /*不可编辑状态*/
     #plotBoard .edit-inactive {
         cursor: pointer;
@@ -599,29 +606,42 @@
         cursor: move;
     }
 
-    #plotBoard .edit-active .control-group .control-scale-item-1 {
-        cursor: w-resize;
-        /*cursor:url("http://ued.taobao.com/blog/wp-content/themes/taobaoued/images/cursor.ico") ,auto;*/
+    #plotBoard .edit-active .control-group {
+        stroke-width: 1;
+        fill: blue
     }
 
-    #plotBoard .edit-active .control-group .control-scale-item-2 {
-        cursor: s-resize;
-    }
-
-    #plotBoard .edit-active .control-group .control-scale-item-3 {
-        cursor: ne-resize;
-    }
-
-    #plotBoard .edit-active .control-group .control-scale-item-4 {
-        cursor: se-resize;
+    #plotBoard .edit-active .control-group .control-center-item {
+        fill: red
     }
 
     #plotBoard .edit-active .control-group .control-rotate-item {
         cursor: crosshair;
         fill: yellow;
         /*cursor: url("rotate.ico"), auto;*/
-
     }
+
+    #plotBoard .edit-active .control-group .control-scale-item-edge-right,
+    #plotBoard .edit-active .control-group .control-scale-item-edge-left {
+        cursor: w-resize;
+        /*cursor:url("http://ued.taobao.com/blog/wp-content/themes/taobaoued/images/cursor.ico") ,auto;*/
+    }
+
+    #plotBoard .edit-active .control-group .control-scale-item-edge-top,
+    #plotBoard .edit-active .control-group .control-scale-item-edge-bottom {
+        cursor: s-resize;
+    }
+
+    #plotBoard .edit-active .control-group .control-scale-item-vertex-right-top,
+    #plotBoard .edit-active .control-group .control-scale-item-vertex-left-bottom {
+        cursor: ne-resize;
+    }
+
+    #plotBoard .edit-active .control-group .control-scale-item-vertex-left-top,
+    #plotBoard .edit-active .control-group .control-scale-item-vertex-right-bottom {
+        cursor: se-resize;
+    }
+
 </style>
 </body>
 

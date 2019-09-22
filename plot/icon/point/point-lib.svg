@@ -3,70 +3,85 @@
      xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
         <!--样式只能为edit-active/edit-inactive-->
-        <g id="point_fly" class="edit-inactive" stroke="black" stroke-width="2"
-           vector-effect="non-scaling-stroke">
-            <line x1="-22" y1="-30" x2="22" y2="-10" vector-effect="non-scaling-stroke"></line>
-            <line x1="-22" y1="-10" x2="22" y2="-30" vector-effect="non-scaling-stroke"></line>
-            <line x1="0" y1="-20" x2="0" y2="0" vector-effect="non-scaling-stroke"></line>
-            <polygon points="0,0 -16,16 16,16" fill="none" vector-effect="non-scaling-stroke"></polygon>
-            <!--样式只能为control-group-->
-            <g id="fly-control" class="control-group" stroke-width="1" fill="blue">
-                <circle cx="0" cy="0" r="2" fill="red" class="control-center-point"></circle>
-                <circle cx="-32" cy="-40" r="3"
-                        class="control-scale-item-4 control-scale-vertex  control-scale-item-vertex-left-top"></circle>
-                <circle cx="0" cy="-40" r="3"
-                        class="control-scale-item-2 control-scale-edge control-scale-item-edge-top"></circle>
-                <circle cx="32" cy="-40" r="3"
-                        class="control-scale-item-3 control-scale-vertex control-scale-item-vertex-right-top"></circle>
-                <circle cx="32" cy="-8" r="3"
-                        class="control-scale-item-1 control-scale-edge control-scale-item-edge-right"></circle>
-                <circle cx="32" cy="24" r="3"
-                        class="control-scale-item-4 control-scale-vertex control-scale-item-vertex-right-bottom"></circle>
-                <circle cx="0" cy="24" r="3"
-                        class="control-scale-item-2 control-scale-edge control-scale-item-edge-bottom"></circle>
-                <circle cx="-32" cy="24" r="3"
-                        class="control-scale-item-3 control-scale-vertex control-scale-item-vertex-left-bottom"></circle>
-                <circle cx="-32" cy="-8" r="3"
-                        class="control-scale-item-1 control-scale-edge control-scale-item-edge-left"></circle>
+        <g id="point_fly" class="edit-inactive">
+            <line x1="-22" y1="-30" x2="22" y2="-10" class="show-item"></line>
+            <line x1="-22" y1="-10" x2="22" y2="-30" class="show-item"></line>
+            <line x1="0" y1="-20" x2="0" y2="0" class="show-item"></line>
+            <polygon points="0,0 -16,16 16,16" fill="none" class="show-item"></polygon>
+            <!--样式只能为control-group;通用模版-->
+            <g class="control-group">
+                <circle cx="0" cy="0" r="2" class="control-center-item"></circle>
                 <circle cx="0" cy="-60" r="3" class="control-rotate-item"></circle>
+                <circle cx="-32" cy="-40" r="3"
+                        class="control-scale-item-vertex-left-top"></circle>
+                <circle cx="0" cy="-40" r="3"
+                        class="control-scale-item-edge-top"></circle>
+                <circle cx="32" cy="-40" r="3"
+                        class="control-scale-item-vertex-right-top"></circle>
+                <circle cx="32" cy="-8" r="3"
+                        class="control-scale-item-edge-right"></circle>
+                <circle cx="32" cy="24" r="3"
+                        class="control-scale-item-vertex-right-bottom"></circle>
+                <circle cx="0" cy="24" r="3"
+                        class="control-scale-item-edge-bottom"></circle>
+                <circle cx="-32" cy="24" r="3"
+                        class="control-scale-item-vertex-left-bottom"></circle>
+                <circle cx="-32" cy="-8" r="3"
+                        class="control-scale-item-edge-left"></circle>
             </g>
         </g>
-        <g id="point_people" class="edit-inactive" stroke="black" stroke-width="2">
-            <circle cx="0" cy="-20" r="10" fill="none"></circle>
-            <line x1="0" y1="-10" x2="-22" y2="10"></line>
-            <line x1="0" y1="-10" x2="22" y2="10"></line>
-            <line x1="0" y1="0" x2="0" y2="20"></line>
-            <g id="people-control" class="control-group" stroke-width="1" fill="blue">
-                <circle cx="-32" cy="-40" r="3" class="control-item-4"></circle>
-                <circle cx="0" cy="-40" r="3" class="control-item-2"></circle>
-                <circle cx="32" cy="-40" r="3" class="control-item-3"></circle>
-                <circle cx="32" cy="-8" r="3" class="control-item-1"></circle>
-                <circle cx="32" cy="24" r="3" class="control-item-4"></circle>
-                <circle cx="0" cy="24" r="3" class="control-item-2"></circle>
-                <circle cx="-32" cy="24" r="3" class="control-item-3"></circle>
-                <circle cx="-32" cy="-8" r="3" class="control-item-1"></circle>
-            </g>
-            <g class="center-point" fill="red">
-                <circle cx="0" cy="0" r="2"></circle>
+        <g id="point_people" class="edit-inactive">
+            <circle cx="0" cy="-20" r="10" fill="none" class="show-item"></circle>
+            <line x1="0" y1="-10" x2="-22" y2="10" class="show-item"></line>
+            <line x1="0" y1="-10" x2="22" y2="10" class="show-item"></line>
+            <line x1="0" y1="0" x2="0" y2="20" class="show-item"></line>
+            <!--样式只能为control-group;通用模版-->
+            <g class="control-group">
+                <circle cx="0" cy="0" r="2" class="control-center-item"></circle>
+                <circle cx="0" cy="-60" r="3" class="control-rotate-item"></circle>
+                <circle cx="-32" cy="-40" r="3"
+                        class="control-scale-item-vertex-left-top"></circle>
+                <circle cx="0" cy="-40" r="3"
+                        class="control-scale-item-edge-top"></circle>
+                <circle cx="32" cy="-40" r="3"
+                        class="control-scale-item-vertex-right-top"></circle>
+                <circle cx="32" cy="-8" r="3"
+                        class="control-scale-item-edge-right"></circle>
+                <circle cx="32" cy="24" r="3"
+                        class="control-scale-item-vertex-right-bottom"></circle>
+                <circle cx="0" cy="24" r="3"
+                        class="control-scale-item-edge-bottom"></circle>
+                <circle cx="-32" cy="24" r="3"
+                        class="control-scale-item-vertex-left-bottom"></circle>
+                <circle cx="-32" cy="-8" r="3"
+                        class="control-scale-item-edge-left"></circle>
             </g>
         </g>
-        <g id="point_ship" class="edit-inactive" stroke="black" stroke-width="2">
-            <path d="M -31 -16 A -16, -16 0 1 ,0 -31 ,16" fill="none"></path>
-            <line x1="-31" y1="-16" x2="0" y2="-16"></line>
-            <line x1="-31" y1="16" x2="0" y2="16"></line>
-            <line x1="0" y1="-16" x2="0" y2="16"></line>
-            <g id="ship-control" class="control-group" stroke-width="1" fill="blue">
-                <circle cx="-56" cy="-32" r="3" class="control-item-4"></circle>
-                <circle cx="-24" cy="-32" r="3" class="control-item-2"></circle>
-                <circle cx="8" cy="-32" r="3" class="control-item-3"></circle>
-                <circle cx="8" cy="0" r="3" class="control-item-1"></circle>
-                <circle cx="8" cy="32" r="3" class="control-item-4"></circle>
-                <circle cx="-24" cy="32" r="3" class="control-item-2"></circle>
-                <circle cx="-56" cy="32" r="3" class="control-item-3"></circle>
-                <circle cx="-56" cy="0" r="3" class="control-item-1"></circle>
-            </g>
-            <g class="center-point" fill="red">
-                <circle cx="0" cy="0" r="2"></circle>
+        <g id="point_ship" class="edit-inactive">
+            <path d="M -31 -16 A -16, -16 0 1 ,0 -31 ,16" fill="none" class="show-item"></path>
+            <line x1="-31" y1="-16" x2="0" y2="-16" class="show-item"></line>
+            <line x1="-31" y1="16" x2="0" y2="16" class="show-item"></line>
+            <line x1="0" y1="-16" x2="0" y2="16" class="show-item"></line>
+            <!--样式只能为control-group;通用模版-->
+            <g class="control-group">
+                <circle cx="0" cy="0" r="2" class="control-center-item"></circle>
+                <circle cx="0" cy="-60" r="3" class="control-rotate-item"></circle>
+                <circle cx="-56" cy="-32" r="3"
+                        class="control-scale-item-vertex-left-top"></circle>
+                <circle cx="-24" cy="-32" r="3"
+                        class="control-scale-item-edge-top"></circle>
+                <circle cx="8" cy="-32" r="3"
+                        class="control-scale-item-vertex-right-top"></circle>
+                <circle cx="8" cy="0" r="3"
+                        class="control-scale-item-edge-right"></circle>
+                <circle cx="8" cy="32" r="3"
+                        class="control-scale-item-vertex-right-bottom"></circle>
+                <circle cx="-24" cy="32" r="3"
+                        class="control-scale-item-edge-bottom"></circle>
+                <circle cx="-56" cy="32" r="3"
+                        class="control-scale-item-vertex-left-bottom"></circle>
+                <circle cx="-56" cy="0" r="3"
+                        class="control-scale-item-edge-left"></circle>
             </g>
         </g>
     </defs>
