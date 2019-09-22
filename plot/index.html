@@ -68,7 +68,7 @@
     </main>
 </div>
 <div id="svg-lib" style="height:0;"></div>
-
+<script src="matrixUtil.js"></script>
 <script src="svgUtils.js"></script>
 <script>
     console.log('完成svg-lib加载');
@@ -84,75 +84,59 @@
     //全局变量
     let svgLeft = null, svgTop = null;
 
-
     //拖拽相关变量
-    let dragTarget = null, dragTargetX = null, dragTargetY = null,
+    let dragTarget = null,
+        dragTargetX = null, dragTargetY = null,
         dragTargetClientX = null, dragTargetClientY = null;
-
 
     function dragStart(evt) {
         dragTarget = getEditClassNode(evt.target);
         if (dragTarget === null) return false;
-        console.log('dragStart');
         dragTargetClientX = evt.clientX;
         dragTargetClientY = evt.clientY;
         let {ret} = getTransformRegValue(dragTarget, 'translate');
-        console.log(ret[0]);
         if (ret !== null) {//肯定有
             dragTargetX = parseFloat(ret[1]);
             dragTargetY = parseFloat(ret[2]);
-            console.log('dragStart:', dragTarget, dragTargetX, dragTargetY, dragTargetClientX, dragTargetClientY)
         }
         return true;
     }
 
     function dragMove(evt) {
         if (dragTarget === null) return false;
-        console.log('dragMove');
+
         let dx = evt.clientX - dragTargetClientX;
         let dy = evt.clientY - dragTargetClientY;
         let {transform, ret} = getTransformRegValue(dragTarget, 'translate');
         let translateBefore = ret[0];
         let translateAfter = `translate(${dx + dragTargetX},${dy + dragTargetY})`;
         transform = transform.replace(translateBefore, translateAfter);
-        console.log('dragMove value:', transform, '/', translateBefore, '/', translateAfter)
         dragTarget.setAttribute('transform', transform)
-
     }
 
     function dragEnd(evt) {
         if (dragTarget === null) return false;
-        console.log('dragEnd');
         dragTarget = null;
         return true;
     }
 
     //缩放相关变量
-    let scaleTarget = null,
-        scaleValueX = null, scaleValueY = null, cx = null, cy = null,
-
-        scaleTargetClientX = null, scaleTargetClientY = null,
-        //以下变量有用
-        scaleUnitX = null, scaleUnitY = null,
-        scaleAngle = null,
-        scaleTargetCenterX = null, scaleTargetCenterY = null;
+    let scaleTarget = null, scaleAngle = null,
+        scaleTargetCenterX = null, scaleTargetCenterY = null,
+        scaleUnitX = null, scaleUnitY = null;
 
     function scaleStart(evt) {
         let scaleType = isScaleTarget(evt.target)
         if (!scaleType) return false;
         scaleTarget = getEditClassNode(evt.target);
         if (scaleTarget === null) return false;
-        console.log('scaleStart');
-        cx = scaleUnitX = parseFloat(evt.target.getAttribute('cx'));
-        cy = scaleUnitY = parseFloat(evt.target.getAttribute('cy'));
-        //3、角度大小
-
         let {retC} = getTransformRegValue(scaleTarget, 'rotate');
         if (retC !== null) { //肯定不
             scaleAngle = parseFloat(retC[1]);
         }
-        //4、缩放比例
+        //缩放比例
         let {ret} = getTransformRegValue(scaleTarget, 'scale');
+        let scaleValueX = null, scaleValueY = null;
         if (ret !== null) {
             scaleValueX = parseFloat(ret[1]);
             scaleValueY = parseFloat(ret[2]);
@@ -160,61 +144,36 @@
             scaleValueX = scaleValueY = 1;
         }
 
-        //1、point的位置
-        scaleTargetClientX = evt.clientX;
-        scaleTargetClientY = evt.clientY;
-        /**
-         * 2、center的位置(错误，和角度，scale都有关系)
-         * 这个是重点问题
-         * 角度:scaleAngle,缩放:scaleValueX,scaleValueY,平移：scaleUnitX,scaleUnitY,终点：scaleTargetClientX,scaleTargetClientY;
-         * 求起始点centerX,centerY
-         *  计算太麻烦，能力不足，使用全局变量吧
-         * */
-        //现在的
-        // let {retCC} = getTransformRegValue(scaleTarget, 'translate');
-        // let tranX, tranY;
-        // if (retCC !== null) {//肯定有
-        //     tranX = parseFloat(retCC[1]);
-        //     tranY = parseFloat(retCC[2]);
-        // }
-        // scaleTargetCenterX = tranX + svgLeft;
-        // scaleTargetCenterY = tranY + svgTop;
-        // console.log('hhhhhhhhh:', scaleTargetCenterX, scaleTargetCenterY,tranX, svgLeft)
+        //point的位置（
+        let scaleTargetClientX = getControlCenter(evt, 'x');
+        let scaleTargetClientY = getControlCenter(evt, 'y');
 
-        //开始的
-        scaleTargetCenterX = scaleTargetClientX - cx;
-        scaleTargetCenterY = scaleTargetClientY - cy;
-        console.log('jjjjjjjj:', scaleTargetCenterX, scaleTargetCenterY, scaleTargetClientX, cx)
-
-        //5、获取投影
-        const {xx, yy} = getProjective({x: scaleTargetCenterX, y: scaleTargetCenterY}, {
-            x: scaleTargetClientX,
-            y: scaleTargetClientY
-        }, scaleAngle)
-
-        console.log('scaleType:', scaleType)
-        console.log('point,center的位置：', {x: scaleTargetClientX, y: scaleTargetClientY}, {
-            x: scaleTargetCenterX,
-            y: scaleTargetCenterY
-        })
-        console.log('角度，xx，yy,scaleValueX,scaleValueY:', scaleAngle, xx, yy, scaleValueX, scaleValueY);
+        let {retCC} = getTransformRegValue(scaleTarget, 'translate');
+        let tranX, tranY;
+        if (retCC !== null) {//肯定有
+            tranX = parseFloat(retCC[1]);
+            tranY = parseFloat(retCC[2]);
+        }
+        scaleTargetCenterX = tranX + svgLeft;
+        scaleTargetCenterY = tranY + svgTop;
+        //获取投影
+        const {xx, yy} = getProjective(
+            {
+                x: scaleTargetCenterX,
+                y: scaleTargetCenterY
+            },
+            {
+                x: scaleTargetClientX,
+                y: scaleTargetClientY
+            }, scaleAngle
+        );
         scaleUnitX = xx / scaleValueX;
         scaleUnitY = yy / scaleValueY;
-        console.log(' scaleUnitX,scaleUnitY:', scaleUnitX, scaleUnitY)
         return true;
-        /**
-         * 得到变量：
-         * 中心点(scaleTargetCenterX,scaleTargetCenterY),
-         * 角度scaleAngle,
-         * 单位投影(scaleUnitX,scaleUnitY),
-         * 后续操作
-         * 根据中心点和角度，计算投影，然后与单位投影求比值即可得到scale
-         * */
     }
 
     function scaleMove(evt) {
         if (scaleTarget === null) return false;
-
         //1、计算投影
         const {xx, yy} = getProjective(
             {
@@ -224,87 +183,71 @@
             {
                 x: evt.clientX,
                 y: evt.clientY
-            }, scaleAngle);
+            }, scaleAngle
+        );
         let scaleX = xx / scaleUnitX;
         let scaleY = yy / scaleUnitY;
-        console.log('现在的缩放比例为：', scaleX, scaleY);
-        console.log('scaleMove:', scaleValueX, scaleValueY,
-            scaleTargetClientX, scaleTargetClientY);
-        // let dx = evt.clientX - scaleTargetClientX;
-        // let scaleX = dx / cx + 1;
-        // console.log(dx, cx, scaleX);
-
-
         let {transform, ret} = getTransformRegValue(scaleTarget, 'scale');
 
         let scaleBefore = ret[0];
         let scaleAfter = `scale(${scaleX},${scaleY})`;
         transform = transform.replace(scaleBefore, scaleAfter);
-        console.log('scaleMove value:', transform, '/', scaleBefore, '/', scaleAfter)
-        scaleTarget.setAttribute('transform', transform)
+        scaleTarget.setAttribute('transform', transform);
         return true;
     }
 
     function scaleEnd() {
         if (scaleTarget === null) return false;
-        console.log('scaleEnd')
         scaleTarget = null;
         return true;
     }
 
     //旋转相关变量
-    let rotateTarget = null, rotateCx = null, rotateCy = null, initAngle = null,
+    let rotateTarget = null, initAngle = null,
+        rotateCx = null, rotateCy = null,
         rotateClientX, rotateClientY;
-
 
     function rotateStart(evt) {
         if (!isRotateTarget(evt.target)) return false;
         rotateTarget = getEditClassNode(evt.target);
         if (rotateTarget === null) return false;
-        console.log('rotateStart');
-
         let {ret} = getTransformRegValue(rotateTarget, 'rotate');
-
         if (ret !== null) { //肯定不
             initAngle = parseFloat(ret[1]);
         }
 
-        let dis = Math.abs(parseFloat(evt.target.getAttribute('cy')));
-        let cx = dis * Math.sin(initAngle * Math.PI / 180);
-        let cy = dis * Math.cos(initAngle * Math.PI / 180);
         rotateClientX = evt.clientX;
         rotateClientY = evt.clientY;
-        rotateCx = rotateClientX - cx;
-        rotateCy = rotateClientY + cy;
-        console.log('计算中心点：', rotateClientX, cx, rotateClientY, cy)
-        console.log(rotateTarget, rotateCx, rotateCy, rotateClientX, rotateClientY, initAngle)
+
+        let {retCC} = getTransformRegValue(rotateTarget, 'translate');
+        let tranX, tranY;
+        if (retCC !== null) {//肯定有
+            tranX = parseFloat(retCC[1]);
+            tranY = parseFloat(retCC[2]);
+        }
+        rotateCx = tranX + svgLeft;
+        rotateCy = tranY + svgTop;
         return true;
     }
 
     function rotateMove(evt) {
         if (rotateTarget === null) return false;
-        console.log('rotateMove');
         let x = evt.clientX;
         let y = evt.clientY;
-        let center = {x: rotateCx, y: rotateCy}, start = {x: rotateClientX, y: rotateClientY}, end = {x, y};
+        let center = {x: rotateCx, y: rotateCy},
+            start = {x: rotateClientX, y: rotateClientY},
+            end = {x, y};
         let dAngle = 0 - getAngle3(center, start, end);
-
         let {transform, ret} = getTransformRegValue(rotateTarget, 'rotate');
-
-
         let rotateBefore = ret[0];
         let rotateAfter = `rotate(${initAngle + dAngle})`;
-
-        console.log('初始角度和差值：', initAngle, dAngle)
         transform = transform.replace(rotateBefore, rotateAfter);
-        console.log('scaleMove value:', transform, '/', rotateBefore, '/', rotateAfter)
-        rotateTarget.setAttribute('transform', transform)
+        rotateTarget.setAttribute('transform', transform);
         return true;
     }
 
     function rotateEnd(evt) {
         if (rotateTarget === null) return false;
-        console.log('rotateEnd');
         rotateTarget = null;
         return true;
     }
@@ -317,9 +260,8 @@
     document.querySelector('.body-wrapper>aside').addEventListener('click', function (evt) {
         if (evt.target.nodeName === 'IMG') {
             let src = evt.target.getAttribute('src');
-            let path = src.substring(5, src.length - 4);
-            console.log('点击了：', path);
-            plotTargetPath = path;
+            plotTargetPath = src.substring(5, src.length - 4);
+
         }
     });
 
@@ -333,6 +275,18 @@
     /**
      *PART1:基础函数
      * */
+    //必须是控制点，且只能在start阶段使用，move阶段很容易出去，不可使用
+    function getControlCenter(evt, type) {
+        let bound = evt.target.getBoundingClientRect();
+        if (type === 'x') {
+            return bound.left + bound.width / 2
+        } else if (type === 'y') {
+            return bound.top + bound.height / 2
+        } else {
+            throw new Error('参数输入错误')
+        }
+    }
+
     function getTransformRegValue(target, type) {
         let transform = target.getAttribute("transform");
         let ret = null;
@@ -391,31 +345,29 @@
         }
     }
 
-    //一个矢量在另一个矢量上投影
+    //矢量的坐标系变换
     function getProjective(center, point, alpha) {
-        let beta = 90 - alpha;
-        //方向也是正确的
-        let yy = Math.cos(beta * Math.PI / 180) * (point.x - center.x) +
-            Math.sin(beta * Math.PI / 180) * (point.y - center.y);
-        let xxz = Math.sqrt(Math.abs(Math.pow(point.x - center.x, 2) +
-            Math.pow(point.y - center.y, 2) - Math.pow(yy, 2)));
-        let dirVal = Math.pow((point.x - center.x - Math.sin(beta * Math.PI / 180)), 2) +
-            Math.pow((point.y - center.y - Math.cos(beta * Math.PI / 180)), 2)
-            - 1 - Math.pow(point.x - center.x, 2) - Math.pow(point.y - center.y, 2);
-        let xx = xxz * (dirVal > 0 ? -1 : 1);
+        let mat_rotate = [
+            Math.cos(alpha * Math.PI / 180), Math.sin(alpha * Math.PI / 180), 0,
+            -Math.sin(alpha * Math.PI / 180), Math.cos(alpha * Math.PI / 180), 0,
+            0, 0, 1
+        ];
+        //y取反
+        let a = [point.x - center.x, -(point.y - center.y), 1];
+        let ret = calc13_33(a, mat_rotate);
+        //y再取反
+        let xx = ret[0], yy = -ret[1];
         return {xx, yy}
     }
 
     function getAngle3(center, start, end) {
         let angle1 = getAngle(center, end);
         let angle2 = getAngle(center, start);
-        console.log('中点，开始点，结束点:', center, start, end, angle1, angle2);
         return angle1 - angle2
     }
 
     //得到元素的编辑状态
     function getEleState(ele) {
-        console.log(ele.nodeName)
         let isActive = ele.getAttribute('class');
         if (isActive !== null && isActive.startsWith("edit")) {
             return isActive
@@ -452,10 +404,10 @@
             }
             let x = evt.clientX - evt.target.getBoundingClientRect().left;
             let y = evt.clientY - evt.target.getBoundingClientRect().top;
-            // plotPointUse(x, y)
+
             plotPointClone(x, y)
         } else if (evt.target.nodeName !== "svg" && plotTargetPath === null) {//选中目标，
-            console.log('选中目标')
+
             let target = evt.target;
             if (getEleState(target) === 'edit-inactive') {//状态不可编辑
                 let node = getEditClassNode(target);
