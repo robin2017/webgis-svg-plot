@@ -68,7 +68,7 @@
     </main>
 </div>
 <div id="svg-lib" style="height:0;"></div>
-
+<script src="matrixUtil.js"></script>
 <script src="svgUtils.js"></script>
 <script>
     console.log('完成svg-lib加载');
@@ -190,7 +190,8 @@
         const {xx, yy} = getProjective({x: scaleTargetCenterX, y: scaleTargetCenterY}, {
             x: scaleTargetClientX,
             y: scaleTargetClientY
-        }, scaleAngle)
+        }, scaleAngle);
+        console.log('33333获得的投影为：', xx, yy);
 
         console.log('scaleType:', scaleType)
         console.log('point,center的位置：', {x: scaleTargetClientX, y: scaleTargetClientY}, {
@@ -200,7 +201,7 @@
         console.log('角度，xx，yy,scaleValueX,scaleValueY:', scaleAngle, xx, yy, scaleValueX, scaleValueY);
         scaleUnitX = xx / scaleValueX;
         scaleUnitY = yy / scaleValueY;
-        console.log(' scaleUnitX,scaleUnitY:', scaleUnitX, scaleUnitY)
+        console.log(' scaleUnitX,scaleUnitY:必须为恒定值32，-40，否则错误！！！！', scaleUnitX, scaleUnitY)
         return true;
         /**
          * 得到变量：
@@ -333,6 +334,7 @@
     /**
      *PART1:基础函数
      * */
+    //必须是控制点，且只能在start阶段使用，move阶段很容易出去，不可使用
     function getControlCenter(evt, type) {
         let bound = evt.target.getBoundingClientRect();
         if (type === 'x') {
@@ -402,18 +404,19 @@
         }
     }
 
-    //一个矢量在另一个矢量上投影
+    //矢量的坐标系变换
     function getProjective(center, point, alpha) {
-        let beta = 90 - alpha;
-        //方向也是正确的
-        let yy = Math.cos(beta * Math.PI / 180) * (point.x - center.x) +
-            Math.sin(beta * Math.PI / 180) * (point.y - center.y);
-        let xxz = Math.sqrt(Math.abs(Math.pow(point.x - center.x, 2) +
-            Math.pow(point.y - center.y, 2) - Math.pow(yy, 2)));
-        let dirVal = Math.pow((point.x - center.x - Math.sin(beta * Math.PI / 180)), 2) +
-            Math.pow((point.y - center.y - Math.cos(beta * Math.PI / 180)), 2)
-            - 1 - Math.pow(point.x - center.x, 2) - Math.pow(point.y - center.y, 2);
-        let xx = xxz * (dirVal > 0 ? -1 : 1);
+        console.log('333333投影的输入：center,point,alpha:', center, point, alpha)
+        let mat_rotate = [
+            Math.cos(alpha * Math.PI / 180), Math.sin(alpha * Math.PI / 180), 0,
+            -Math.sin(alpha * Math.PI / 180), Math.cos(alpha * Math.PI / 180), 0,
+            0, 0, 1
+        ];
+        //y取反
+        let a = [point.x - center.x, -(point.y - center.y), 1];
+        let ret = calc13_33(a, mat_rotate);
+        //y再取反
+        let xx = ret[0], yy = -ret[1];
         return {xx, yy}
     }
 
