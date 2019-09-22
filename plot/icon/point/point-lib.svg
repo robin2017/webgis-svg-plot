@@ -12,14 +12,22 @@
             <!--样式只能为control-group-->
             <g id="fly-control" class="control-group" stroke-width="1" fill="blue">
                 <circle cx="0" cy="0" r="2" fill="red" class="control-center-point"></circle>
-                <circle cx="-32" cy="-40" r="3" class="control-scale-item-4 control-scale-vertex"></circle>
-                <circle cx="0" cy="-40" r="3" class="control-scale-item-2 control-scale-edge"></circle>
-                <circle cx="32" cy="-40" r="3" class="control-scale-item-3 control-scale-vertex"></circle>
-                <circle cx="32" cy="-8" r="3" class="control-scale-item-1 control-scale-edge"></circle>
-                <circle cx="32" cy="24" r="3" class="control-scale-item-4 control-scale-vertex"></circle>
-                <circle cx="0" cy="24" r="3" class="control-scale-item-2 control-scale-edge"></circle>
-                <circle cx="-32" cy="24" r="3" class="control-scale-item-3 control-scale-vertex"></circle>
-                <circle cx="-32" cy="-8" r="3" class="control-scale-item-1 control-scale-edge"></circle>
+                <circle cx="-32" cy="-40" r="3"
+                        class="control-scale-item-4 control-scale-vertex  control-scale-item-vertex-left-top"></circle>
+                <circle cx="0" cy="-40" r="3"
+                        class="control-scale-item-2 control-scale-edge control-scale-item-edge-top"></circle>
+                <circle cx="32" cy="-40" r="3"
+                        class="control-scale-item-3 control-scale-vertex control-scale-item-vertex-right-top"></circle>
+                <circle cx="32" cy="-8" r="3"
+                        class="control-scale-item-1 control-scale-edge control-scale-item-edge-right"></circle>
+                <circle cx="32" cy="24" r="3"
+                        class="control-scale-item-4 control-scale-vertex control-scale-item-vertex-right-bottom"></circle>
+                <circle cx="0" cy="24" r="3"
+                        class="control-scale-item-2 control-scale-edge control-scale-item-edge-bottom"></circle>
+                <circle cx="-32" cy="24" r="3"
+                        class="control-scale-item-3 control-scale-vertex control-scale-item-vertex-left-bottom"></circle>
+                <circle cx="-32" cy="-8" r="3"
+                        class="control-scale-item-1 control-scale-edge control-scale-item-edge-left"></circle>
                 <circle cx="0" cy="-60" r="3" class="control-rotate-item"></circle>
             </g>
         </g>

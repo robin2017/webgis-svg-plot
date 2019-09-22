@@ -121,12 +121,13 @@
     }
 
     //缩放相关变量
-    let scaleTarget = null, scaleAngle = null,
+    let scaleTarget = null, scaleAngle = null, scaleType = null,
         scaleTargetCenterX = null, scaleTargetCenterY = null,
         scaleUnitX = null, scaleUnitY = null;
 
     function scaleStart(evt) {
-        let scaleType = isScaleTarget(evt.target)
+        scaleType = isScaleTarget(evt.target);
+        console.log('scaleType:', scaleType);
         if (!scaleType) return false;
         scaleTarget = getEditClassNode(evt.target);
         if (scaleTarget === null) return false;
@@ -190,7 +191,10 @@
         let {transform, ret} = getTransformRegValue(scaleTarget, 'scale');
 
         let scaleBefore = ret[0];
-        let scaleAfter = `scale(${scaleX},${scaleY})`;
+
+        let scaleBeforeX = parseFloat(ret[1]),
+            scaleBeforeY = parseFloat(ret[2]);
+        let scaleAfter = `scale(${scaleType !== 2 ? scaleX : scaleBeforeX},${scaleType !== 3 ? scaleY : scaleBeforeY})`;
         transform = transform.replace(scaleBefore, scaleAfter);
         scaleTarget.setAttribute('transform', transform);
         return true;
@@ -306,14 +310,17 @@
         }
     }
 
-    //元素是不是缩放控制点，不是则为0，控制边点则为1，控制中心点则为2
+    //元素是不是缩放控制点，不是则为0，控制边点则为1，控制中心点(上下)则为2,控制中心点(左右)则为3,
     function isScaleTarget(ele) {
         let _class = ele.getAttribute('class');
         if (_class !== null && _class.indexOf('control-scale-item') !== -1) {
-            if (_class.indexOf('control-scale-vertex') !== -1) {
+            if (_class.indexOf('control-scale-item-vertex') !== -1) {
                 return 1;
-            } else {
+            } else if (_class.indexOf('control-scale-item-edge-top') !== -1
+                || _class.indexOf('control-scale-item-edge-bottom') !== -1) {
                 return 2;
+            } else {
+                return 3;
             }
         }
         return 0
