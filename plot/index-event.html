@@ -81,6 +81,9 @@
     const translateRegEx = /translate\((.*?),(.*?)\)/;
     const scaleRegEx = /scale\((.*?),(.*?)\)/;
     const rotateRegEx = /rotate\((.*?)\)/;
+    //全局变量
+    let svgLeft = null, svgTop = null;
+
 
     //拖拽相关变量
     let dragTarget = null, dragTargetX = null, dragTargetY = null,
@@ -125,21 +128,30 @@
     }
 
     //缩放相关变量
-    let scaleTarget = null, scaleTargetX = null, scaleTargetY = null,
+    let scaleTarget = null,
         scaleValueX = null, scaleValueY = null, cx = null, cy = null,
+
         scaleTargetClientX = null, scaleTargetClientY = null,
-        scaleUnitX = null, scaleUnitY = null;
+        //以下变量有用
+        scaleUnitX = null, scaleUnitY = null,
+        scaleAngle = null,
+        scaleTargetCenterX = null, scaleTargetCenterY = null;
 
     function scaleStart(evt) {
-        if (!isScaleTarget(evt.target)) return false;
+        let scaleType = isScaleTarget(evt.target)
+        if (!scaleType) return false;
         scaleTarget = getEditClassNode(evt.target);
         if (scaleTarget === null) return false;
         console.log('scaleStart');
         cx = scaleUnitX = parseFloat(evt.target.getAttribute('cx'));
         cy = scaleUnitY = parseFloat(evt.target.getAttribute('cy'));
+        //3、角度大小
 
-        scaleTargetClientX = evt.clientX;
-        scaleTargetClientY = evt.clientY;
+        let {retC} = getTransformRegValue(scaleTarget, 'rotate');
+        if (retC !== null) { //肯定不
+            scaleAngle = parseFloat(retC[1]);
+        }
+        //4、缩放比例
         let {ret} = getTransformRegValue(scaleTarget, 'scale');
         if (ret !== null) {
             scaleValueX = parseFloat(ret[1]);
@@ -147,23 +159,84 @@
         } else {
             scaleValueX = scaleValueY = 1;
         }
-        console.log('scaleStart value:', cx, cy, scaleTarget, scaleValueX, scaleValueY)
+
+        //1、point的位置
+        scaleTargetClientX = evt.clientX;
+        scaleTargetClientY = evt.clientY;
+        /**
+         * 2、center的位置(错误，和角度，scale都有关系)
+         * 这个是重点问题
+         * 角度:scaleAngle,缩放:scaleValueX,scaleValueY,平移：scaleUnitX,scaleUnitY,终点：scaleTargetClientX,scaleTargetClientY;
+         * 求起始点centerX,centerY
+         *  计算太麻烦，能力不足，使用全局变量吧
+         * */
+        let {retCC} = getTransformRegValue(scaleTarget, 'translate');
+        let tranX,tranY;
+        console.log(ret[0]);
+        if (retCC !== null) {//肯定有
+            tranX = parseFloat(ret[1]);
+            tranY = parseFloat(ret[2]);
+        }
+
+
+
+        scaleTargetCenterX = tranX +svgLeft;
+        scaleTargetCenterY = tranY+svgTop;
+        console.log('hhhhhhhhh:',scaleTargetCenterX,scaleTargetCenterY)
+
+        //5、获取投影
+        const {xx, yy} = getProjective({x: scaleTargetCenterX, y: scaleTargetCenterY}, {
+            x: scaleTargetClientX,
+            y: scaleTargetClientY
+        }, scaleAngle)
+
+        console.log('scaleType:', scaleType)
+        console.log('point,center的位置：', {x: scaleTargetClientX, y: scaleTargetClientY}, {
+            x: scaleTargetCenterX,
+            y: scaleTargetCenterY
+        })
+        console.log('角度，xx，yy,scaleValueX,scaleValueY:', scaleAngle, xx, yy, scaleValueX, scaleValueY);
+        scaleUnitX = xx / scaleValueX;
+        scaleUnitY = yy / scaleValueY;
+        console.log(' scaleUnitX,scaleUnitY:', scaleUnitX, scaleUnitY)
         return true;
+        /**
+         * 得到变量：
+         * 中心点(scaleTargetCenterX,scaleTargetCenterY),
+         * 角度scaleAngle,
+         * 单位投影(scaleUnitX,scaleUnitY),
+         * 后续操作
+         * 根据中心点和角度，计算投影，然后与单位投影求比值即可得到scale
+         * */
     }
 
     function scaleMove(evt) {
         if (scaleTarget === null) return false;
+
+        //1、计算投影
+        const {xx, yy} = getProjective(
+            {
+                x: scaleTargetCenterX,
+                y: scaleTargetCenterY
+            },
+            {
+                x: evt.clientX,
+                y: evt.clientY
+            }, scaleAngle);
+        let scaleX = xx / scaleUnitX;
+        let scaleY = yy / scaleUnitY;
+        console.log('现在的缩放比例为：', scaleX, scaleY);
         console.log('scaleMove:', scaleValueX, scaleValueY,
             scaleTargetClientX, scaleTargetClientY);
-        let dx = evt.clientX - scaleTargetClientX;
-        let scaleX = dx / cx + 1;
-        console.log(dx, cx, scaleX);
+        // let dx = evt.clientX - scaleTargetClientX;
+        // let scaleX = dx / cx + 1;
+        // console.log(dx, cx, scaleX);
 
 
         let {transform, ret} = getTransformRegValue(scaleTarget, 'scale');
 
         let scaleBefore = ret[0];
-        let scaleAfter = `scale(${scaleX},1)`;
+        let scaleAfter = `scale(${scaleX},${scaleY})`;
         transform = transform.replace(scaleBefore, scaleAfter);
         console.log('scaleMove value:', transform, '/', scaleBefore, '/', scaleAfter)
         scaleTarget.setAttribute('transform', transform)
@@ -270,24 +343,30 @@
         } else {
             console.error('reg type 错误')
         }
+        let transformC = transform, retC = ret;
+        let transformCC = transformC, retCC = retC;
         return {
-            transform, ret
+            transform, ret, transformC, retC, transformCC, retCC
         }
     }
 
-    //元素是不是缩放控制点
+    //元素是不是缩放控制点，不是则为0，控制边点则为1，控制中心点则为2
     function isScaleTarget(ele) {
         let _class = ele.getAttribute('class');
-        if (_class !== null && _class.startsWith('control-scale-item')) {
-            return true
+        if (_class !== null && _class.indexOf('control-scale-item') !== -1) {
+            if (_class.indexOf('control-scale-vertex') !== -1) {
+                return 1;
+            } else {
+                return 2;
+            }
         }
-        return false
+        return 0
     }
 
     //元素是不是旋转控制点
     function isRotateTarget(ele) {
         let _class = ele.getAttribute('class');
-        if (_class !== null && _class === 'control-rotate-item') {
+        if (_class !== null && _class.indexOf('control-rotate-item') !== -1) {
             return true
         }
         return false
@@ -308,6 +387,21 @@
         } else {
             return Math.atan(dy / dx) * 180 / Math.PI + 180;
         }
+    }
+
+    //一个矢量在另一个矢量上投影
+    function getProjective(center, point, alpha) {
+        let beta = 90 - alpha;
+        //方向也是正确的
+        let yy = Math.cos(beta * Math.PI / 180) * (point.x - center.x) +
+            Math.sin(beta * Math.PI / 180) * (point.y - center.y);
+        let xxz = Math.sqrt(Math.abs(Math.pow(point.x - center.x, 2) +
+            Math.pow(point.y - center.y, 2) - Math.pow(yy, 2)));
+        let dirVal = Math.pow((point.x - center.x - Math.sin(beta * Math.PI / 180)), 2) +
+            Math.pow((point.y - center.y - Math.cos(beta * Math.PI / 180)), 2)
+            - 1 - Math.pow(point.x - center.x, 2) - Math.pow(point.y - center.y, 2);
+        let xx = xxz * (dirVal > 0 ? -1 : 1);
+        return {xx, yy}
     }
 
     function getAngle3(center, start, end) {
@@ -350,6 +444,10 @@
      * */
     plotBoard.addEventListener('click', function (evt) {
         if (plotTargetPath !== null && evt.target.nodeName === "svg") {
+            if (!svgLeft || !svgTop) {
+                svgLeft = evt.target.getBoundingClientRect().left;
+                svgTop = evt.target.getBoundingClientRect().top;
+            }
             let x = evt.clientX - evt.target.getBoundingClientRect().left;
             let y = evt.clientY - evt.target.getBoundingClientRect().top;
             // plotPointUse(x, y)
