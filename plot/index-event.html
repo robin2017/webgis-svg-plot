@@ -275,8 +275,22 @@
         let cy = dis * Math.cos(initAngle * Math.PI / 180);
         rotateClientX = evt.clientX;
         rotateClientY = evt.clientY;
+        //计算错误！！！
+        //以前的
         rotateCx = rotateClientX - cx;
         rotateCy = rotateClientY + cy;
+        //现在的
+        let {retCC} = getTransformRegValue(rotateTarget, 'translate');
+        let tranX, tranY;
+        if (retCC !== null) {//肯定有
+            tranX = parseFloat(retCC[1]);
+            tranY = parseFloat(retCC[2]);
+        }
+        rotateCx = tranX + svgLeft;
+        rotateCy = tranY + svgTop;
+
+
+
         console.log('计算中心点：', rotateClientX, cx, rotateClientY, cy)
         console.log(rotateTarget, rotateCx, rotateCy, rotateClientX, rotateClientY, initAngle)
         return true;
@@ -288,6 +302,8 @@
         let x = evt.clientX;
         let y = evt.clientY;
         let center = {x: rotateCx, y: rotateCy}, start = {x: rotateClientX, y: rotateClientY}, end = {x, y};
+        console.log('9999999:center,start,end:',center,start,end);
+        console.log('9999999每次点击，center和start都不变，end变化，且如果不平移，center也一直不变')
         let dAngle = 0 - getAngle3(center, start, end);
 
         let {transform, ret} = getTransformRegValue(rotateTarget, 'rotate');
@@ -298,7 +314,7 @@
 
         console.log('初始角度和差值：', initAngle, dAngle)
         transform = transform.replace(rotateBefore, rotateAfter);
-        console.log('scaleMove value:', transform, '/', rotateBefore, '/', rotateAfter)
+        console.log('rotateMove value:', transform, '/', rotateBefore, '/', rotateAfter)
         rotateTarget.setAttribute('transform', transform)
         return true;
     }
